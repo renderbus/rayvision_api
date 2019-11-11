@@ -1,14 +1,6 @@
-rayvision_api
-=============
-A Python-based API for Using Renderbus cloud rendering service.
+#!/usr/bin/env python
+# -*- encoding: utf-8 -*-
 
-#### 1. 系统要求
-
-​        rayvision_api 可在 Linux和 Windows 上运行。使用python2.7解释器或者python3.4+解释器  
-
-#### 2.使用demo
-
-```python
 from rayvision_api import RayvisionAPI
 
 user_info = {
@@ -32,8 +24,3 @@ print(user_profile)
 print("======= user setting=============")
 user_setting = api.user.query_user_setting()
 print(user_setting)
-```
-
-#### 3. 更多
-
-详细的使用请参考[RenderBus SDK 显示说明书]( https://renderbus.readthedocs.io/zh/latest/index.html  "SDK详细说明书")
