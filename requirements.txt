@@ -1,0 +1,6 @@
+attrs
+cattrs
+tenacity
+future
+requests
+rayvision_log
