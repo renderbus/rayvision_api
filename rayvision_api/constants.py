@@ -85,7 +85,7 @@ TASK_INFO = {
         'frames_per_task': '1',
         'pre_frames': '000',
         'job_stop_time': '86400',
-        'task_stop_time': '259200',
+        'task_stop_time': '0',
         'time_out': '43200',
         'stop_after_test': '2',
         'project_name': '',
