@@ -71,10 +71,12 @@ CG_SETTING = {
     'Houdini': '2004',
     'Katana': '2016',
     'Clarisse': '2013',
+    'Blender': '2007',
     '2000': 'Maya',
     '2004': 'Houdini',
     '2016': 'Katana',
     '2013': 'Clarisse',
+    '2007': 'Blender'
 }
 
 TASK_INFO = {
