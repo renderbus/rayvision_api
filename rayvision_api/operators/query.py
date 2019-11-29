@@ -298,7 +298,7 @@ class Query(object):
         """Get supported rendering software plugins.
 
         Args:
-            name (str): The name of the DDC.
+            name (str): The name of the DCC.
                 e.g.:
                     maya,
                     houdini
