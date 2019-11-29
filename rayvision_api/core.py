@@ -121,27 +121,10 @@ class RayvisionAPI(object):
         """Submit a task.
 
         Args:
-            data (dict):
-                e.g.:
-                     {
-                        "render_software": "Maya",
-                        "software_version": "2018",
-                        "label_name": "Project1",
-                        "plugin_config": {
-                                            "mtoa":"3.1.2.1"
-                                         }
-                      }
+            task_id (int): Task id.
 
         """
-        # task = self.task.create_task()
-        try:
-            if isinstance(task_id, int):
-                self.task.submit_task(task_id)
-            else:
-                raise RayvisonTaskIdError("task_id must int !!!!")
-        except RayvisionAPIError as e:
-            return {"code": e.error_code, "message": e.error}
-        except RayvisonTaskIdError as e:
-            return {"code": e.error_code, "message": e.error}
+        if isinstance(task_id, int):
+            self.task.submit_task(task_id)
         else:
-            return {"code": 200}
+            raise RayvisonTaskIdError("task_id must int !!!!")

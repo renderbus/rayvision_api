@@ -190,7 +190,7 @@ class RayvisionTask(object):
             cg_id = CG_SETTING[self.render_software]
         except KeyError:
             raise RayvisionError(1000000, (
-                'Not matching the correct DDC software {},'
+                'Not matching the correct DCC software {},'
                 'please check again'.format(self.render_software)))
 
         if cg_id is None:
