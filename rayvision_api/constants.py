@@ -65,6 +65,8 @@ DELETE_RENDER_ENV = '/api/render/common/deleteRenderEnv'
 SET_DEFAULT_RENDER_ENV = '/api/render/common/setDefaultRenderEnv'
 GET_RENDER_ENV = '/api/render/common/getRenderEnv'
 UPDATE_TASK_USER_LEVEL = '/api/rendering/task/renderingTask/updateTaskUserLevel'
+GETRAYSYNCUSERKEY = '/api/render/user/getRaySyncUserKey'
+GETTRANSFERSERVERMSG = '/api/render/task/getTransferServerMsg'
 
 CG_SETTING = {
     'Maya': '2000',
@@ -79,6 +81,8 @@ CG_SETTING = {
     '2013': 'Clarisse',
     '2007': 'Blender',
     '2001': '3dsmax'
+
+
 }
 
 TASK_INFO = {

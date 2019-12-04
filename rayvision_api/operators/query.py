@@ -334,3 +334,45 @@ class Query(object):
         cg_id = constants.DCC_ID_MAPPINGS[name]
         data = {'cgId': cg_id}
         return self._connect.post(constants.QUERY_SUPPORTED_PLUGIN, data)
+
+    def get_transfer_server_msg(self):
+        """Get the user rendering environment configuration.
+
+        Returns:
+            dict: Connect raysync information.
+                Example:
+                    {
+                        'raysyncTransfer': {
+                            'port': 2542,
+                            'proxyIp': 'render.raysync.cn',
+                            'proxyPort': 32011,
+                            'serverIp': '127.0.0.1',
+                            'serverPort': 2121,
+                            'sslPort': 2543
+                        }
+                    }
+
+        """
+        zone = 1
+        if "renderbus" not in self._connect.domain:
+            zone = 2
+        data = {
+            'zone': zone
+        }
+
+        return self._connect.post(constants.GETTRANSFERSERVERMSG, data)
+
+    def get_raysync_user_key(self):
+        """Get the user rendering environment configuration.
+
+        Returns:
+            dict: User login raysync information.
+                Example:
+                    {
+                        'raySyncUserKey': '8ccb94d67c1e4c17fd0691c02ab7f753cea64e3d',
+                        'userName': 'test',
+                        'platform': 2,
+                    }
+
+        """
+        return self._connect.post(constants.GETRAYSYNCUSERKEY, {})
