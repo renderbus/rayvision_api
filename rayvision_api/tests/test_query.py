@@ -78,3 +78,41 @@ def test_supported_software(fixture_query, mock_requests):
     info = fixture_query.supported_software()['renderInfoList']
     assert info[0]['cgName'] == 'Maya'
     assert info[0]['cgType'] == 'ma;mb'
+
+
+def test_get_transfer_server_msg(fixture_query, mock_requests):
+    """Test supported_software this interface."""
+    mock_requests(
+        {'data': {
+            'raysyncTransfer': {
+                'port': 2542,
+                'proxyIp': 'render.raysync.cn',
+                'proxyPort': 32011,
+                'serverIp': '127.0.0.1',
+                'serverPort': 2121,
+                'sslPort': 2543
+            }
+        }}
+    )
+    info = fixture_query.get_transfer_server_msg()['raysyncTransfer']
+    assert info['port'] == 2542
+    assert info['proxyIp'] == 'render.raysync.cn'
+    assert info['proxyPort'] == 32011
+    assert info['serverIp'] == '127.0.0.1'
+    assert info['serverPort'] == 2121
+    assert info['sslPort'] == 2543
+
+
+def test_get_raysync_user_key(fixture_query, mock_requests):
+    """Test supported_software this interface."""
+    mock_requests(
+        {'data': {
+            'raySyncUserKey': '8ccb94d67c1e4c17fd0691c02ab7f753cea64e3d',
+            'userName': 'test',
+            'platform': 2,
+        }}
+    )
+    info = fixture_query.get_raysync_user_key()
+    assert info['raySyncUserKey'] == '8ccb94d67c1e4c17fd0691c02ab7f753cea64e3d'
+    assert info['userName'] == 'test'
+    assert info['platform'] == 2
