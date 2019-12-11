@@ -331,7 +331,7 @@ class Query(object):
                     }
 
         """
-        cg_id = constants.DCC_ID_MAPPINGS[name]
+        cg_id = constants.DCC_ID_MAPPINGS[name.lower()]
         data = {'cgId': cg_id}
         return self._connect.post(constants.QUERY_SUPPORTED_PLUGIN, data)
 

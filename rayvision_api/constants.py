@@ -21,6 +21,7 @@ DCC_ID_MAPPINGS = {
     'keyshot': 2012,
     'clarisse': 2013,
     'octane_render': 2014,
+    'katana': 2016,
 }
 
 # The headers of rayvision api.
