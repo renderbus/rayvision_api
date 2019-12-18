@@ -88,6 +88,7 @@ CG_SETTING = {
 
 TASK_INFO = {
     'task_info': {
+        'enable_layered': '0',
         'input_cg_file': '',
         'is_picture': '0',
         'task_id': '',
@@ -135,5 +136,6 @@ MODIFIABLE_PARAM = [
     'input_project_path',
     'render_layer_type',
     'os_name',
-    'ram'
+    'ram',
+    'enable_layered',
 ]
