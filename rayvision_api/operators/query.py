@@ -72,7 +72,8 @@ class Query(object):
             return details
         return None
 
-    def get_task_list(self, page_num=1, page_size=2):
+    def get_task_list(self, page_num=1, page_size=2, status_list=None, search_keyword=None,
+                      start_time=None, end_time=None):
         """Get task list.
 
         An old to the new row, the old one.
@@ -110,6 +111,28 @@ class Query(object):
             'pageNum': page_num,
             'pageSize': page_size
         }
+        if bool(status_list):
+            if isinstance(status_list, list):
+                data['statusList'] = status_list
+            else:
+                raise TypeError("status_list must be list")
+        if bool(search_keyword):
+            if isinstance(search_keyword, str):
+                data['searchKeyword'] = search_keyword
+            else:
+                raise TypeError("search_keyword must be string")
+        if bool(start_time):
+            if isinstance(start_time, str):
+                data['startTime'] = start_time
+            else:
+                raise TypeError("start_time must be string")
+        if bool(end_time):
+            if isinstance(end_time, str):
+                data['endTime'] = end_time
+            else:
+                raise TypeError("end_time must be string")
+
+
         return self._connect.post(constants.GET_TASK_LIST, data)
 
     def task_frames(self, task_id, page_num, page_size,
@@ -184,7 +207,7 @@ class Query(object):
 
         """
         data = {
-            'taskParam': task_param_list
+            'taskIds': task_param_list
         }
         self._connect.post(constants.RESTART_FAILED_FRAMES, data)
 
@@ -199,12 +222,19 @@ class Query(object):
                 1 all re-raised, 0 specified frame re-request.
 
         """
-        ids_list = ids_list or []
         data = {
-            'taskId': task_id,
-            'ids': ids_list,
+            'taskIds': task_id,
             'selectAll': select_all
         }
+        if bool(ids_list):
+            if isinstance(ids_list, list):
+                data['ids'] = ids_list
+            else:
+                raise TypeError("ids_list must be list type")
+        else:
+            data['ids'] = []
+
+
         self._connect.post(constants.RESTART_FRAME, data)
 
     def task_info(self, task_ids_list):
@@ -331,7 +361,14 @@ class Query(object):
                     }
 
         """
-        cg_id = constants.DCC_ID_MAPPINGS[name.lower()]
+        if bool(name) and bool(name.strip()):
+            if isinstance(name, str):
+                cg_id = constants.DCC_ID_MAPPINGS[name.strip().lower()]
+            else:
+                raise TypeError("plugin 'name' must be string")
+        else:
+            raise TypeError("plugin 'name' required, cannot be None or null characters")
+        
         data = {'cgId': cg_id}
         return self._connect.post(constants.QUERY_SUPPORTED_PLUGIN, data)
 

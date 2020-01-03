@@ -12,13 +12,15 @@ class Task(object):
         """Initialize instance."""
         self._connect = connect
 
-    def create_task(self, count=1, out_user_id=None):
+    def create_task(self, count=1, out_user_id=None, task_user_level=50, labels=None):
         """Create task ID.
 
         Args:
             count (int, optional): The quantity of task ID.
             out_user_id (int, optional): Non-required, external user ID, used
                 to distinguish users accessing third parties.
+            task_user_level (int): Set the user's task level to either 50 or 60, default is 50.
+            labels (list or tuple): Custom task labels, optional.
 
         Returns:
             dict: Task info.
@@ -31,20 +33,39 @@ class Task(object):
 
         """
         data = {
-            'count': count
+            'count': count,
+            'taskUserLevel': task_user_level
         }
         if out_user_id:
             data['outUserId'] = out_user_id
+        if labels:
+            if isinstance(labels, list):
+                data['labels'] = labels
+            else:
+                raise TypeError('Labels must be lists')
         return self._connect.post(constants.CREATE_TASK, data)
 
-    def submit_task(self, task_id):
+    def submit_task(self, task_id, asset_lsolation_model= None, out_user_id= None):
         """Submit task.
 
         Args:
             task_id (int): Submit task ID.
 
         """
-        self._connect.post(constants.SUBMIT_TASK, {'taskId': task_id})
+        data = {
+            "taskId": task_id
+        }
+
+        if bool(asset_lsolation_model) and isinstance(asset_lsolation_model, str):
+            if asset_lsolation_model.strip().upper() in ["TASK_ID_MODEL", "OUT_USER_MODEL"]:
+                data["assetIsolationModel"] = asset_lsolation_model.strip().upper()
+            else:
+                raise TypeError("asset_lsolation_model must be 'TASK_ID_MODEL' or 'OUT_USER_MODEL'")
+
+        if bool(out_user_id) and isinstance(out_user_id, str):
+            data["outUserId"] = out_user_id.strip()
+
+        self._connect.post(constants.SUBMIT_TASK, data)
 
     def stop_task(self, task_param_list):
         """Stop the task.
