@@ -6,7 +6,6 @@ from future.moves.urllib.error import HTTPError
 
 from rayvision_api import utils
 from rayvision_api.connect import Connect
-from rayvision_api.exception import RayvisionAPIError
 from rayvision_api.exception import RayvisionError
 from rayvision_api.exception import RayvisonTaskIdError
 from rayvision_api.operators import Query

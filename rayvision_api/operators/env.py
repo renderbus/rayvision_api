@@ -61,7 +61,7 @@ class RenderEnv(object):
         if isinstance(render_env, dict):
             render_env = fields.Env(**render_env)
         data = unstructure(render_env)
-        self._connect.post(constants.UPDATE_RENDER_ENV, data)
+        return self._connect.post(constants.UPDATE_RENDER_ENV, data)
 
     def delete_render_env(self, edit_name):
         """Delete user rendering environment configuration.
@@ -73,10 +73,10 @@ class RenderEnv(object):
         data = {
             'editName': edit_name
         }
-        self._connect.post(constants.DELETE_RENDER_ENV, data)
+        return self._connect.post(constants.DELETE_RENDER_ENV, data)
 
     def set_default_render_env(self, edit_name):
-        """Delete user rendering environment configuration.
+        """Set the default render environment configuration.
 
         Args:
             edit_name (str): Rendering environment custom name.
@@ -85,7 +85,7 @@ class RenderEnv(object):
         data = {
             'editName': edit_name
         }
-        self._connect.post(constants.SET_DEFAULT_RENDER_ENV, data)
+        return self._connect.post(constants.SET_DEFAULT_RENDER_ENV, data)
 
     def get_render_env(self, name):
         """Get the user rendering environment configuration.

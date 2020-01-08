@@ -67,11 +67,11 @@ class User(object):
         """Update user settings.
 
         Args:
-            task_over_time (int): Task timeout settings.
+            task_over_time (int): The task timeout is set in seconds.
 
         """
         data = {
-            'taskOverTime': task_over_time
+            'taskOverTimeSec': task_over_time
         }
         return self._connect.post(constants.UPDATE_USER_SETTINGS, data)
 
