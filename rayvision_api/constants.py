@@ -66,8 +66,12 @@ DELETE_RENDER_ENV = '/api/render/common/deleteRenderEnv'
 SET_DEFAULT_RENDER_ENV = '/api/render/common/setDefaultRenderEnv'
 GET_RENDER_ENV = '/api/render/common/getRenderEnv'
 UPDATE_TASK_USER_LEVEL = '/api/rendering/task/renderingTask/updateTaskUserLevel'
-GETRAYSYNCUSERKEY = '/api/render/user/getRaySyncUserKey'
-GETTRANSFERSERVERMSG = '/api/render/task/getTransferServerMsg'
+GET_RAYSYNC_USERKEY = '/api/render/user/getRaySyncUserKey'
+GET_TRANSFER_SERVER_MSG = '/api/render/task/getTransferServerMsg'
+LOAD_TASK_PROCESSING = '/api/render/task/loadTaskProcessImg'
+SET_OVER_TIME_STOP = '/api/render/task/setOverTimeStop'
+LOADING_FRAME_THUMBNAIL = '/api/render/task/loadingFrameThumbnail'
+FULL_SPEED = '/api/render/task/fullSpeed'
 
 CG_SETTING = {
     'Maya': '2000',

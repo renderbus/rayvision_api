@@ -81,6 +81,10 @@ class Query(object):
         Args:
             page_num (int): Required value, current page.
             page_size (int): Required value, numbers displayed per page.
+            status_list (list<int>): status code list，query the status of the task in the list.
+            search_keyword (string): Optional, scenario name or job ID.
+            start_time (string): Optional, search limit for start time.
+            end_time (string): Optional, search limit for end time.
 
         Returns:
             dict: Task info, please see the documentation for details.
@@ -131,7 +135,6 @@ class Query(object):
                 data['endTime'] = end_time
             else:
                 raise TypeError("end_time must be string")
-
 
         return self._connect.post(constants.GET_TASK_LIST, data)
 
@@ -209,7 +212,7 @@ class Query(object):
         data = {
             'taskIds': task_param_list
         }
-        self._connect.post(constants.RESTART_FAILED_FRAMES, data)
+        return self._connect.post(constants.RESTART_FAILED_FRAMES, data)
 
     def restart_frame(self, task_id, select_all, ids_list=None):
         """Re-submit the specified frame.
@@ -234,8 +237,7 @@ class Query(object):
         else:
             data['ids'] = []
 
-
-        self._connect.post(constants.RESTART_FRAME, data)
+        return self._connect.post(constants.RESTART_FRAME, data)
 
     def task_info(self, task_ids_list):
         """Get task details.
@@ -368,8 +370,8 @@ class Query(object):
                 raise TypeError("plugin 'name' must be string")
         else:
             raise TypeError("plugin 'name' required, cannot be None or null characters")
-        
         data = {'cgId': cg_id}
+
         return self._connect.post(constants.QUERY_SUPPORTED_PLUGIN, data)
 
     def get_transfer_server_msg(self):
@@ -397,7 +399,7 @@ class Query(object):
             'zone': zone
         }
 
-        return self._connect.post(constants.GETTRANSFERSERVERMSG, data)
+        return self._connect.post(constants.GET_TRANSFER_SERVER_MSG, data)
 
     def get_raysync_user_key(self):
         """Get the user rendering environment configuration.
@@ -412,4 +414,79 @@ class Query(object):
                     }
 
         """
-        return self._connect.post(constants.GETRAYSYNCUSERKEY, {})
+        return self._connect.post(constants.GET_RAYSYNC_USERKEY, {})
+
+    def get_task_processing_img(self, task_id, frame_type=None):
+        """Get the task progress diagram,currently only Max software is supported.
+
+        Args:
+            task_id (int): Task id.
+            frame_type (int): Apply colours to a drawing type, nonessential 2
+                represents the photon frame, 5 gets the main picture progress,
+                and returns the result dynamically according to the stage of
+                the rendering task
+            Example:
+                {
+                    "taskId":389406
+                }
+
+        Returns: Task progress diagram information
+            dict:
+                Example:
+                    {
+                        "block":16,
+                        "currentTaskType":"Render",
+                        "grabInfo":[
+                            [
+                                {
+                                    "couponFee":"0.00",
+                                    "frameIndex":"0",
+                                    "renderInfo":"",
+                                    "frameBlock":"1",
+                                    "frameEst":"0",
+                                    "grabUrl":"/mnt/output/d20/small_pic/10001500/10001834/389406/Render_2018110900083_0_frame_0[_]block_0[_]_STP00000_Renderbus_0000[-]tga.jpg",
+                                    "feeAmount":"0.20",
+                                    "frameUsed":"66",
+                                    "frameStatus":"4",
+                                    "framePercent":"100",
+                                    "isMaxPrice":"0",
+                                    "startTime":"2018-11-09 18:28:26",
+                                    "endTime":"2018-11-09 18:29:32"
+                                }
+                            ]
+                        ],
+                        "height":1500,
+                        "sceneName":"com_589250.max-Camera007",
+                        "startTime":"2018-11-09 18:27:40",
+                        "width":2000
+                    }
+
+        """
+        data = {
+            'taskId': task_id
+        }
+        if frame_type:
+            data['frameType'] = frame_type
+        return self._connect.post(constants.LOAD_TASK_PROCESSING, data)
+
+    def get_frame_thumbnall(self, frame_id, frame_status=4):
+        """Load thumbnail.
+
+        Args:
+            frame_id (int): Frame id.
+            frame_status (int): State of the frame, only complete with
+                thumbnails.
+
+        Returns:
+            list: Thumbnail path.
+                Example:
+                    [
+                        "small_pic\\100000\\100001\\138\\Render_264_renderbus_0008[-]jpg.jpg"
+                    ]
+
+        """
+        data = {
+            'id': frame_id,
+            'frameStatus': frame_status
+        }
+        return self._connect.post(constants.LOADING_FRAME_THUMBNAIL, data)

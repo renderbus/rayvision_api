@@ -22,7 +22,7 @@ class Tag(object):
             'newName': new_name,
             'status': status
         }
-        self._connect.post(constants.ADD_LABEL, data)
+        return self._connect.post(constants.ADD_LABEL, data)
 
     def delete_label(self, del_name):
         """Delete custom label.
@@ -31,7 +31,7 @@ class Tag(object):
             del_name (str): The name of the label to be deleted.
 
         """
-        self._connect.post(constants.DELETE_LABEL, {'delName': del_name})
+        return self._connect.post(constants.DELETE_LABEL, {'delName': del_name})
 
     def get_label_list(self):
         """Get custom labels.

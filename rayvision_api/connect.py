@@ -85,7 +85,7 @@ class Connect(object):
         self.logger.debug('HTTP Body: %s', data)
         response = requests.post(url, data, headers=headers)
         json_response = response.json()
-        print(json_response)
+        self.logger.debug('HTTP Response: %s', json_response)
         code = json_response['code']
         if code != 200:
             raise RayvisionAPIError(code, json_response['message'],
