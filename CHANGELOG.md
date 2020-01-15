@@ -1,4 +1,5 @@
-## 1.0.0 (2020-01-14)
+
+## 0.4.3 (2020-01-10)
 
 * add 3dmax to "CG_SETTING" and modify some description. ([a3e9965](https://github.com/renderbus/rayvision_api/commit/a3e9965))
 * add blender ([2e25301](https://github.com/renderbus/rayvision_api/commit/2e25301))
