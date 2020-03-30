@@ -13,7 +13,7 @@ def parse_requirements(filename):
 
 setup(
     name='rayvision_api',
-    author='RayVision',
+    author='Shenzhen Rayvision Technology Co., Ltd',
     author_email='developer@rayvision.com',
     url='https://gitlab.renderbus.com/internal/rayvision_api',
     package_dir={'': '.'},
@@ -29,5 +29,4 @@ setup(
     ],
     use_scm_version=True,
     setup_requires=['setuptools_scm'],
-
 )

@@ -11,6 +11,14 @@ import platform
 import random
 import re
 import time
+import os
+import json
+import codecs
+import sys
+
+from .exception import RayvisionError
+
+VERSION = sys.version_info[0]
 
 
 def generate_timestamp():
@@ -252,3 +260,183 @@ def to_bytes(string):
 def assemble_api_url(domain, operators, protocol='https'):
     """Assemble the requests api url."""
     return '{}://{}{}'.format(protocol, domain, operators)
+
+
+def json_load(json_path, encoding='utf-8'):
+    """Load the data from the json file.
+
+    Args:
+        json_path (str): Json file path.
+        encoding (str): Encoding, default is ``utf-8``.
+
+    Returns:
+        dict: Data in the json file.
+            e.g.:
+                {
+                    "task_info"
+                }
+
+    """
+    with codecs.open(json_path, 'r', encoding=encoding) as f_json:
+        data = json.load(f_json)
+
+    return data
+
+
+def json_save(json_path, data, encoding='utf-8', ensure_ascii=True):
+    """Will save to the json file according to the specified encoded data.
+
+    Args:
+        json_path (str): Json file path.
+        data (dict): Asset information data.
+            e.g.:
+                {
+                    "scene_info": {
+                        "defaultRenderLayer":{
+                            "renderable": "1",
+                            "is_default_camera": "1",
+                        }
+                    }
+                }
+        encoding (str): Encoding, default is ``utf-8``.
+        ensure_ascii (bool): Whether to ignore the error, default ``True``.
+
+    """
+    with codecs.open(json_path, 'w', encoding=encoding) as f_json:
+        if VERSION == 3:
+            json.dump(data, f_json, ensure_ascii=ensure_ascii, indent=2)
+        else:
+            f_json.write(str(json.dumps(data, ensure_ascii=ensure_ascii,
+                                        indent=2)))
+
+
+def convert_path(path):
+    """Convert to the path the server will accept.
+
+    Args:
+        path (str): Local file path.
+            e.g.:
+                "D:/work/render/19183793/max/d/Work/c05/112132P-embery.jpg"
+
+    Returns:
+        str: Path to the server.
+            e.g.:
+                "/D/work/render/19183793/max/d/Work/c05/112132P-embery.jpg"
+
+    """
+    lower_path = path.replace('\\', '/')
+    if lower_path[1] == ":":
+        path_lower = lower_path.replace(":", "")
+        path_server = "/" + path_lower
+    else:
+        path_server = lower_path[1:]
+
+    return path_server
+
+
+def check_and_read(json_path):
+    files_paths = json_path.replace("\\", "/")
+    if not os.path.exists(files_paths):
+        raise RayvisionError(1000004, "{} is not found".format(files_paths))
+    return json_load(files_paths)
+
+
+def update_task_info(update_info, task_path):
+    """Update the task Settings.
+
+    Args:
+        update_info (dict): Information that needs to be updated.
+        task_path ( str or dict): task.json absolute path or dict info.
+    """
+    task_info = check_and_read(task_path)
+    for update_key in update_info.keys():
+        if update_key not in task_info.get("task_info"):
+            raise RayvisionError(1000002,
+                                 "{} does not exist in the task setting and cannot be updated".format(update_key))
+
+    task_info["task_info"].update(update_info)
+    json_save(task_path, task_info)
+
+
+def append_to_task(append_info, task_path, cover=True):
+    """Add new field information in task_info.
+
+    Args:
+        append_info (dict): Information that needs to be added
+        cover (bool): If the added field already exists, whether to overwrite it,
+            The default is overwrite.
+
+    """
+    task_info = check_and_read(task_path)
+    task_append_info = task_info.get("append_info", {})
+    if not cover:
+        for append_key in append_info:
+            if append_key in task_append_info.keys():
+                raise RayvisionError(1000002, "{} already exists, cannot be added".format(append_key))
+    else:
+        task_append_info.update(append_info)
+        task_info["append_info"] = task_append_info
+
+    json_save(task_path, task_info)
+
+
+def check_upload_file(file_path, upload_info):
+    """Check that the file is already in the upload list.
+
+    Args:
+        file_path (str): File path.
+        upload_info (dict): Upload json info.
+
+    Returns:
+        bool.
+
+    """
+    for one_file in upload_info.get("asset"):
+        if one_file["local"] == file_path:
+            return True
+    return False
+
+
+def append_to_upload(files_paths, upload_path):
+    """Add the asset information you need to upload to upload_info.
+
+    Args:
+        files_paths (str or list): You need to add the uploaded asset path.
+        upload_path (str): Upload json path.
+
+    """
+    upload_info = check_and_read(upload_path)
+    if isinstance(files_paths, str):
+        files_paths = files_paths.replace("\\", "/")
+        if not os.path.exists(files_paths):
+            raise RayvisionError(1000004, "{} is not found".format(files_paths))
+
+        status = check_upload_file(files_paths, upload_info)
+        if status:
+            return
+
+        upload_info["asset"].append(
+            {
+                "local": files_paths.replace("\\", "/"),
+                "server": convert_path(files_paths),
+            },
+        )
+    elif isinstance(files_paths, list):
+        for files_path in files_paths:
+            files_path = files_path.replace("\\", "/")
+            if not os.path.exists(files_path):
+                raise RayvisionError(1000004,
+                                     "{} is not found".format(files_path))
+
+            status = check_upload_file(files_path, upload_info)
+            if status:
+                continue
+
+            upload_info["asset"].append({
+                "local": files_path.replace("\\", "/"),
+                "server": convert_path(files_path),
+            })
+    else:
+        raise RayvisionError(1000003, "files_paths must be a str or list.".format(files_paths))
+
+    json_save(upload_path, upload_info)

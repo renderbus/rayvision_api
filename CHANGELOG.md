@@ -11,4 +11,8 @@
 * update parameter name:3dsmax-->3ds Max ([ceae80f](https://github.com/renderbus/rayvision_api/commit/ceae80f))
 
 
+## 1.1.0 (2020-03-30)
 
+* requirements.txt fixed package version
+* Add task.json and upload.json methods to update parameters and add custom parameters
+* RayvisionAPI and RayvisionCheck logical update

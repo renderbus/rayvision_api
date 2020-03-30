@@ -3,19 +3,17 @@
 
 from rayvision_api import RayvisionAPI
 
-user_info = {
-    "domain_name": "task.renderbus.com",
+render_para = {
+    "domain": "task.renderbus.com",
     "platform": "2",
-    "access_id": "xxxxxxx",
-    "access_key": "xxxxxxx",
-    "local_os": 'windows',
-    "workspace": "c:/workspace",
+    "access_id": "xxxxx",
+    "access_key": "xxxxx",
 }
 
-api = RayvisionAPI(access_id=user_info['access_id'],
-                   access_key=user_info['access_key'],
-                   domain=user_info['domain_name'],
-                   platform=user_info['platform'])
+api = RayvisionAPI(access_id=render_para['access_id'],
+                   access_key=render_para['access_key'],
+                   domain=render_para['domain'],
+                   platform=render_para['platform'])
 
 # print("======= 获取平台列表 =============")
 # platform = api.query.platforms()
