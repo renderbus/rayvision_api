@@ -358,24 +358,24 @@ def update_task_info(update_info, task_path):
     json_save(task_path, task_info)
 
 
-def append_to_task(append_info, task_path, cover=True):
+def append_to_task(additional_info, task_path, cover=True):
     """Add new field information in task_info.
 
     Args:
-        append_info (dict): Information that needs to be added
+        additional_info (dict): Information that needs to be added
         cover (bool): If the added field already exists, whether to overwrite it,
             The default is overwrite.
 
     """
     task_info = check_and_read(task_path)
-    task_append_info = task_info.get("append_info", {})
+    task_append_info = task_info.get("additional_info", {})
     if not cover:
-        for append_key in append_info:
+        for append_key in additional_info:
             if append_key in task_append_info.keys():
                 raise RayvisionError(1000002, "{} already exists, cannot be added".format(append_key))
     else:
-        task_append_info.update(append_info)
-        task_info["append_info"] = task_append_info
+        task_append_info.update(additional_info)
+        task_info["additional_info"] = task_append_info
 
     json_save(task_path, task_info)
 
