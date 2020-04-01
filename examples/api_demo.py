@@ -4,10 +4,10 @@
 from rayvision_api import RayvisionAPI
 
 render_para = {
-    "domain": "task.renderbus.com",
+    "domain": "task.renderbus.com",  # 用戶不需要修改
     "platform": "2",
-    "access_id": "xxxxx",
-    "access_key": "xxxxx",
+    "access_id": "xxxxx",  # 用户自行修改(必填)
+    "access_key": "xxxxx",  # 用户自行修改(必填)
 }
 
 api = RayvisionAPI(access_id=render_para['access_id'],
@@ -15,9 +15,10 @@ api = RayvisionAPI(access_id=render_para['access_id'],
                    domain=render_para['domain'],
                    platform=render_para['platform'])
 
-# print("======= 获取平台列表 =============")
-# platform = api.query.platforms()
-# print(platform)
+
+print("======= 获取平台列表 =============")
+platform = api.query.platforms()
+print(platform)
 #
 # print("======= 获取用户详情 =============")
 # user_profile = api.user.query_user_profile()
