@@ -51,9 +51,9 @@ class Task(object):
         Args:
             task_id (int): Submit task ID.
             asset_lsolation_model (str): Asset isolation type, Optional value,
-                default is null, optional value：'TASK_ID_MODEL'、'OUT_USER_MODEL'.
+                default is null, optional value:'TASK_ID_MODEL' or 'OUT_USER_MODEL'.
             out_user_id (str): The asset isolates the user ID, Optional value,
-                when asset_lsolation_model='OUT_USER_MODEL' ,‘out_user_id’ cant be empty.
+                when asset_lsolation_model='OUT_USER_MODEL' ,'out_user_id' cant be empty.
 
         """
         data = {

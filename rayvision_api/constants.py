@@ -141,3 +141,6 @@ MODIFIABLE_PARAM = [
     'ram',
     'enable_layered',
 ]
+
+
+KEYS = ["layers", "scene_info_render", "task_info", "scene_info", "software_config"]

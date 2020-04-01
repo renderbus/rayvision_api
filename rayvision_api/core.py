@@ -39,7 +39,7 @@ class RayvisionAPI(object):
 
         """
         self.logger = logger or logging.getLogger(__name__)
-        self.user_info = {'local_os': local_os}
+        self.user_info = {'local_os': local_os, 'domain': domain, 'platform': platform}
         connect = Connect(access_id, access_key, protocol, domain, platform)
         self.user = User(connect)
         self.task = Task(connect)
@@ -116,6 +116,94 @@ class RayvisionAPI(object):
             if key_underline != 'platform':
                 self.user_info[key_underline] = value
 
+    def get_task_id(self):
+        """Get task id.
+
+        Example::
+
+            task_id_info = {
+                    "taskIdList": [1658434],
+                    "aliasTaskIdList": [2W1658434],
+                    "userId": 100093088
+                }
+
+        Returns: str
+
+        """
+        task_id_info = self.task.create_task(count=1, out_user_id=None)
+        task_id = task_id_info.get('taskIdList', [''])[0]
+        if task_id == '':
+            # Task ID creating failed
+            raise RayvisionError(1000000,
+                                 r'Failed to create task number!')
+        return str(task_id)
+
+    def get_user_id(self):
+        """Get user id.
+
+        Example:
+            user_profile_info = {
+                "userId": 10001136,
+                "userName": "rayvision",
+                "platform": 2,
+                "phone": "173333333333",
+                "email": "",
+                "company": "",
+                "name": "",
+                "job": "",
+                "communicationNumber": "",
+                "softType": 2000,
+                "softStatus": 1,
+                "businessType": 1,
+                "status": 1,
+                "infoStatus": 0,
+                "accountType": 1,
+            }
+        Returns: str
+
+        """
+        user_profile_info = self.user.query_user_profile()
+        user_id = user_profile_info.get('userId', '')
+        if user_id == '':
+            raise RayvisionError(1000000, r'Failed to get user number!')
+        return str(user_id)
+
+    def check_and_add_project_name(self, project_name):
+        """Get the tag id.
+
+        Call the API interface to obtain all the label information of the
+        user, determine whether the label name to be added already exists,
+        and obtain the label id if it exists. If the label does not exist,
+        the API interface is repeatedly requested. The request is up to three
+        times. If the third time does not exist, the empty string is returned.
+
+        Args:
+            project_name (str): The name of the tag to be added.
+
+        Returns:
+            int: Tag id.
+
+        """
+        is_label_exist = False
+        project_id = ''
+        for _ in range(2):
+            label_dict_list = (self.tag.get_label_list().
+                               get('projectNameList', []))
+            for label_dict in label_dict_list:
+                if label_dict['projectName'] == project_name:
+                    is_label_exist = True
+                    project_id = str(label_dict['projectId'])
+                    break
+            # Add a label if the no label exists.
+            if not is_label_exist:
+                self.tag.add_label(project_name, '0')
+            else:
+                if project_id == '':
+                    continue
+                break
+
+        return project_id
+
     def submit(self, task_id):
         """Submit a task.
 
@@ -126,4 +214,6 @@ class RayvisionAPI(object):
         if isinstance(task_id, int):
             self.task.submit_task(task_id)
         else:
-            raise RayvisonTaskIdError("task_id must int !!!!")
+            raise RayvisonTaskIdError(10006, "task_id must int !!!!")
+
+        return True

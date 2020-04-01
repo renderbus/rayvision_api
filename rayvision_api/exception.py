@@ -28,9 +28,9 @@ class RayvisionError(Exception):
 class RayvisonTaskIdError(RayvisionError):
     """Raise RayVisonTaskIdError."""
 
-    def __init__(self, error):
+    def __init__(self, error_code, error):
         """Initialize Task error message, inherited RayvisionError."""
-        super(RayvisonTaskIdError, self).__init__(error)
+        super(RayvisionError, self).__init__(error_code, error)
         self.error_code = 2000
         self.error = error
 

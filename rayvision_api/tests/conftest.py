@@ -7,7 +7,7 @@ References:
     https://docs.pytest.org/en/2.7.3/plugins.html
 
 """
-
+import os, sys
 import re
 
 # pylint: disable=import-error
@@ -113,7 +113,11 @@ def task(task_info, mocker):
 
 
 @pytest.fixture()
-def check(task):
+def check(task, tmpdir):
     """Create an RayvisionCheck object."""
     from rayvision_api.task.check import RayvisionCheck
+    if "win" in sys.platform.lower():
+        os.environ["USERPROFILE"] = str(tmpdir)
+    else:
+        os.environ["HOME"] = str(tmpdir)
     return RayvisionCheck(task)
