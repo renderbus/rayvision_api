@@ -7,7 +7,7 @@ from pprint import pformat
 
 import requests
 from tenacity import retry
-from tenacity import stop_after_attempt
+from tenacity import stop_after_attempt, wait_random
 
 from rayvision_api import utils
 from rayvision_api.constants import HEADERS
@@ -51,7 +51,7 @@ class Connect(object):
         """Assemble the requests api url."""
         return '{}://{}{}'.format(protocol, domain, operators)
 
-    @retry(reraise=True, stop=stop_after_attempt(5))
+    @retry(reraise=True, stop=stop_after_attempt(5), wait=wait_random(min=1, max=2))
     def post(self, api_url, data=None):
         """Send an post request and return data object if no error occurred.
 
