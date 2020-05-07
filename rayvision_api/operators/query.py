@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """API query operation."""
+import sys
 
 from rayvision_api import constants
 
@@ -370,7 +371,8 @@ class Query(object):
                 raise TypeError("plugin 'name' must be string")
         else:
             raise TypeError("plugin 'name' required, cannot be None or null characters")
-        data = {'cgId': cg_id}
+        platform = "windows" if sys.platform.startswith("win") else "linux"
+        data = {'cgId': cg_id, 'osName': platform}
 
         return self._connect.post(constants.QUERY_SUPPORTED_PLUGIN, data)
 
