@@ -13,6 +13,7 @@ import time
 from past.builtins import long
 
 # Import local modules
+from rayvision_api.utils import exists_or_create
 from rayvision_api.constants import MODIFIABLE_PARAM
 from rayvision_api.exception import RayvisionError
 from rayvision_api.utils import json_load
@@ -38,7 +39,6 @@ class RayvisionCheck(object):
         self.upload_info = {}
 
         self.analyze = analyze
-        self.check_analyze(self.analyze, self.workspace)
         self.errors_number = 0
         self.error_warn_info_list = []
 
@@ -68,15 +68,10 @@ class RayvisionCheck(object):
 
         return workspace
 
-    def check_analyze(self, analyze, workspace):
+    def check_analyze(self, analyze, workspace, is_cover=True):
         """Initializes the configuration file information."""
-        if not analyze:
-            tmp_name = str(int(time.time()))
-            self.task_json = os.path.join(workspace, tmp_name, "task.json")
-            self.tips_json = os.path.join(workspace, tmp_name, "tips.json")
-            self.asset_json = os.path.join(workspace, tmp_name, "asset.json")
-            self.upload_json = os.path.join(workspace, tmp_name, "upload.json")
-        else:
+
+        if analyze:
             self.task_json = analyze.task_json
             self.tips_json = analyze.tips_json
             self.asset_json = analyze.asset_json
@@ -85,6 +80,25 @@ class RayvisionCheck(object):
             self.task_info = analyze.task_info
             self.asset_info = analyze.asset_info
             self.upload_info = analyze.upload_info
+            tmp_dir_name = os.path.dirname(analyze.task_json)
+
+        elif is_cover:
+            self.task_json = os.path.join(workspace, "task.json")
+            self.tips_json = os.path.join(workspace, "tips.json")
+            self.asset_json = os.path.join(workspace, "asset.json")
+            self.upload_json = os.path.join(workspace, "upload.json")
+            tmp_dir_name = workspace
+
+        else:
+            tmp_name = str(int(time.time()))
+            tmp_dir_name = os.path.join(self.workspace, tmp_name)
+            exists_or_create(tmp_dir_name)
+            self.task_json = os.path.join(tmp_dir_name, "task.json")
+            self.tips_json = os.path.join(tmp_dir_name, "tips.json")
+            self.asset_json = os.path.join(tmp_dir_name, "asset.json")
+            self.upload_json = os.path.join(tmp_dir_name, "upload.json")
+
+        return tmp_dir_name
 
     def check_task_info(self, task_info):
         """Check and add the required parameter information."""
@@ -102,18 +116,25 @@ class RayvisionCheck(object):
             task_info["task_info"]["project_id"] = self.api.check_and_add_project_name(task_info["task_info"]["project_name"])
         return task_info
 
-    def execute(self, task_json, upload_json):
+    def execute(self, task_json, upload_json, asset_json="", is_cover=True):
         """Check asset configuration information.
 
         Check the scene for problems and filter unwanted configuration
         information.
+        Args:
+            is_cover (bool): Whether the updated json file overwrites the file under the original path,
+                             by default 'True'.
 
         """
+        tmp_dir_name = self.check_analyze(analyze=self.analyze, workspace=os.path.dirname(task_json), is_cover=is_cover)
+        logging.info("json_path ==> %s" % tmp_dir_name)
         task_info = json_load(task_json)
         upload_info = json_load(upload_json)
+        asset_info = json_load(asset_json)
         self.logger.info('[Rayvision_utils check start .....]')
         self.task_info = self.check_task_info(task_info)
         self.upload_info = upload_info or {}
+        self.asset_info = asset_info
 
         self.check_error_warn_info()
         self.is_scene_have_error()  # Check error.
@@ -200,11 +221,11 @@ class RayvisionCheck(object):
                         value = str(value)
                     self.task_info['task_info'][key] = value
 
-        self._write_to_json_file(upload_info)
+        self._write_to_json_file()
 
         return True
 
-    def _write_to_json_file(self, upload_info):
+    def _write_to_json_file(self):
         """Update json file.
 
         Update the processed asset information to the corresponding json file.
@@ -215,11 +236,10 @@ class RayvisionCheck(object):
 
         """
         # Write upload.json.
-        if upload_info is not None:
-            self.upload_info = upload_info
+        if self.upload_info is not None:
             with codecs.open(self.upload_json,
                              'w', 'utf-8') as f_upload_json:
-                json.dump(upload_info, f_upload_json, indent=4,
+                json.dump(self.upload_info, f_upload_json, indent=4,
                           ensure_ascii=False)
 
         # Write task.json.
@@ -229,8 +249,15 @@ class RayvisionCheck(object):
                       ensure_ascii=False)
 
         # Write tips.json.
-        if not os.path.exists(self.tips_json):
+        if self.tips_info is not None:
             with codecs.open(self.tips_json,
                              'w', 'utf-8') as f_tips_json:
                 json.dump(self.tips_info, f_tips_json,
+                          indent=4, ensure_ascii=False)
+
+        # Write asset.json.
+        if self.asset_info is not None:
+            with codecs.open(self.asset_json,
+                             'w', 'utf-8') as f_asset_json:
+                json.dump(self.asset_info, f_asset_json,
                           indent=4, ensure_ascii=False)
