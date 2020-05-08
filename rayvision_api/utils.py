@@ -277,10 +277,11 @@ def json_load(json_path, encoding='utf-8'):
                 }
 
     """
-    with codecs.open(json_path, 'r', encoding=encoding) as f_json:
-        data = json.load(f_json)
+    if os.path.exists(json_path):
+        with codecs.open(json_path, 'r', encoding=encoding) as f_json:
+            data = json.load(f_json)
 
-    return data
+        return data
 
 
 def json_save(json_path, data, encoding='utf-8', ensure_ascii=True):
@@ -440,3 +441,9 @@ def append_to_upload(files_paths, upload_path):
         raise RayvisionError(1000003, "files_paths must be a str or list.".format(files_paths))
 
     json_save(upload_path, upload_info)
+
+
+def exists_or_create(folder):
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+    return os.path.exists(folder)
