@@ -1,0 +1,14 @@
+cgId:
+  type: integer
+cgName:
+  type: string
+cgVersion:
+  type: string
+renderLayerType:
+  type: integer
+editName:
+  type: string
+renderSystem:
+  type: integer
+pluginIds:
+  type: list

@@ -1,18 +1,19 @@
 """Initialize user, task, query, environment, tag interface."""
 
 import logging
-
+import os
 from future.moves.urllib.error import HTTPError
+import json
+from rayvision_log import init_logger
 
-from rayvision_api import utils
 from rayvision_api.connect import Connect
 from rayvision_api.exception import RayvisionError
-from rayvision_api.exception import RayvisonTaskIdError
-from rayvision_api.operators import Query
+from rayvision_api.operators import QueryOperator
 from rayvision_api.operators import RenderEnv
-from rayvision_api.operators import Tag
-from rayvision_api.operators import Task
-from rayvision_api.operators import User
+from rayvision_api.operators import TagOperator
+from rayvision_api.operators import TaskOperator
+from rayvision_api.operators import UserOperator
+from rayvision_api.constants import PACKAGE_NAME
 
 
 class RayvisionAPI(object):
@@ -22,101 +23,66 @@ class RayvisionAPI(object):
     and tag action.
     """
 
-    def __init__(self, access_id, access_key, domain='task.renderbus.com',
-                 platform='4', protocol='https', local_os='windows',
+    def __init__(self,
+                 access_id=None,
+                 access_key=None,
+                 domain='task.renderbus.com',
+                 platform='4',
+                 protocol='https',
                  logger=None):
         """Please note that this is API parameter initialization.
 
         Args:
-            access_id (str): The access id of API.
-            access_key (str): The access key of the API.
+            access_id (str, optional): The access id of API.
+            access_key (str, optional): The access key of the API.
             domain (str, optional): The domain address of the API.
             platform (str, optional): The platform of renderFarm.
             protocol (str, optional): The requests protocol.
-            local_os (str, optional): The name of current system,support
-                "window" and "linux"
             logger (logging.Logger, optional): The logging logger instance.
 
         """
-        self.logger = logger or logging.getLogger(__name__)
-        self.user_info = {'local_os': local_os, 'domain': domain, 'platform': platform}
-        connect = Connect(access_id, access_key, protocol, domain, platform)
-        self.user = User(connect)
-        self.task = Task(connect)
-        self.query = Query(connect)
-        self.tag = Tag(connect)
-        self.env = RenderEnv(connect)
-        self.project = Tag(connect)
+        self.logger = logger
+        if not self.logger:
+            init_logger(PACKAGE_NAME)
+            self.logger = logging.getLogger(__name__)
 
-        try:
-            self._login()
-        except HTTPError:
-            self.logger.error('Login failed.')
-            raise RayvisionError(20020, 'Login failed.')
+        access_id = access_id or os.getenv("RAYVISION_API_ACCESS_ID")
+        if not access_id:
+            raise TypeError(
+                'Required "access_id" not specified. Pass as argument or set '
+                'in environment variable RAYVISION_API_ACCESS_ID.'
+            )
+        access_key = access_key or os.getenv("RAYVISION_API_KEY")
+        if not access_id:
+            raise TypeError(
+                'Required "access_key" not specified. Pass as argument or set '
+                'in environment variable RAYVISION_API_KEY.'
+            )
 
-    def _login(self):
-        """Supplement user's configuration information.
+        self._connect = Connect(access_id,
+                                access_key,
+                                protocol,
+                                domain,
+                                platform)
 
-        Call the API interface (query_user_profile, query_user_setting,
-        get_transfer_bid) to supplement the user's configuration information
+        # Initial all api instance.
+        self.user = UserOperator(self._connect)
+        self.task = TaskOperator(self._connect)
+        self.query = QueryOperator(self._connect)
+        self.tag = TagOperator(self._connect)
+        self.env = RenderEnv(self._connect)
+        self.project = TagOperator(self._connect)
 
-        """
-        self.logger.info('Starting login.')
-        user_profile = self.user.query_user_profile()
-        user_setting = self.user.query_user_setting()
-        transfer_bid = self.user.get_transfer_bid()
-        user_profile.update(user_setting)
-        user_profile.update(transfer_bid)
-        self._update_user_info(user_profile)
-        self.logger.debug('User information: %s', self.user_info)
+    @property
+    def user_info(self):
+        return self.user.info
 
-    def _update_user_info(self, user_profile):
-        """Update user's configuration information.
+    @property
+    def connect(self):
+        """rayvision.api.Connect: The current connect instance."""
+        return self._connect
 
-        Args:
-            user_profile (dict): User's configuration information.
-                .e.g:
-                    Too much information, only the part.
-                    {
-                        u 'config_bid': u '30201',
-                        u 'cpu_price': '0.67',
-                        u 'max_ignore_map_flag': '1',
-                        u 'credit': '0.0',
-                        u 'share_main_capital': '0',
-                        u 'user_name': u 'mxinye123',
-                        u 'common_coupon': '0.018',
-                        u 'job': u '',
-                        u 'address': u '',
-                        u 'user_type': '1',
-                        u 'input_bid': u '10202',
-                        u 'hide_job_charge': '0',
-                        u 'houdini_flag': '1',
-                        u 'display_subaccount': '1',
-                        u 'business_type': '1',
-                        u 'usdbalance': '0.0',
-                        u 'account_type': None,
-                        u 'ignore_map_flag': '0',
-                        u 'picture_lever': '0',
-                        u 'rmbbalance': '64.495',
-                        u 'city': u 'Guangdong Zhongshan',
-                        u 'assfile_switch_flag': '0',
-                        u 'user_id': '100093088',
-                        u 'mandatory_analyse_all_agent': '0',
-                        u 'subaccount_limits': '5',
-                        u 'country': u 'China',
-                        u 'download_limit': '0',
-                        'domain_name': u 'task.renderbus.com',
-                        u 'sub_delete_task': '0',
-                        'platform': u '2',
-                    }
-
-        """
-        for key, value in user_profile.items():
-            key_underline = utils.hump2underline(key)
-            if key_underline != 'platform':
-                self.user_info[key_underline] = value
-
-    def get_task_id(self):
+    def _get_task_id(self):
         """Get task id.
 
         Example::
@@ -127,16 +93,16 @@ class RayvisionAPI(object):
                     "userId": 100093088
                 }
 
-        Returns: str
+        Returns:
+            int: The ID number of the task.
 
         """
         task_id_info = self.task.create_task(count=1, out_user_id=None)
-        task_id = task_id_info.get('taskIdList', [''])[0]
-        if task_id == '':
-            # Task ID creating failed
-            raise RayvisionError(1000000,
-                                 r'Failed to create task number!')
-        return str(task_id)
+        task_id_list = task_id_info.get("taskIdList")
+        if not task_id_list:
+            raise RayvisionError(1000000, 'Failed to create task number!')
+        task_id = task_id_list[0]
+        return task_id
 
     def get_user_id(self):
         """Get user id.
@@ -159,14 +125,14 @@ class RayvisionAPI(object):
                 "infoStatus": 0,
                 "accountType": 1,
             }
-        Returns: str
+        Returns:
+            int: The ID number of the current user.
 
         """
-        user_profile_info = self.user.query_user_profile()
-        user_id = user_profile_info.get('userId', '')
-        if user_id == '':
-            raise RayvisionError(1000000, r'Failed to get user number!')
-        return str(user_id)
+        try:
+            return self.user.user_id
+        except KeyError:
+            raise RayvisionError(1000000, 'Failed to get user number!')
 
     def check_and_add_project_name(self, project_name):
         """Get the tag id.
@@ -204,16 +170,15 @@ class RayvisionAPI(object):
 
         return project_id
 
-    def submit(self, task_id):
+    def submit(self, task_info):
         """Submit a task.
 
         Args:
-            task_id (int): Task id.
+            task_info (dict): Task id.
 
         """
-        if isinstance(task_id, int):
-            self.task.submit_task(task_id)
-        else:
-            raise RayvisonTaskIdError(10006, "task_id must int !!!!")
+        task_info = json.dumps(task_info)
 
-        return True
+        task_id = self._get_task_id()
+        self.task.submit_task(task_id)
+        return task_id

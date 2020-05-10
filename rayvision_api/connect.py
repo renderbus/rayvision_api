@@ -4,14 +4,17 @@ import copy
 import json
 import logging
 from pprint import pformat
+import time
 
 import requests
 from tenacity import retry
 from tenacity import stop_after_attempt, wait_random
 
-from rayvision_api import utils
 from rayvision_api.constants import HEADERS
 from rayvision_api.exception import RayvisionAPIError
+from rayvision_api import signature
+from rayvision_api.validator import validate_data
+from rayvision_api.url import URL
 
 
 class Connect(object):
@@ -30,7 +33,9 @@ class Connect(object):
 
         """
         self.logger = logging.getLogger(__name__)
+        self.url = URL
         self.domain = domain
+        self.platform = platform
         self._access_key = access_key
         # Example: https://task.renderbus.com
         self._protocol = protocol
@@ -39,7 +44,7 @@ class Connect(object):
             HEADERS.update(headers)
         self._headers = HEADERS
         self._headers['accessId'] = access_id
-        self._headers['platform'] = platform
+        self._headers['platform'] = self.platform
 
     @property
     def headers(self):
@@ -51,21 +56,23 @@ class Connect(object):
         """Assemble the requests api url."""
         return '{}://{}{}'.format(protocol, domain, operators)
 
-    @retry(reraise=True, stop=stop_after_attempt(5), wait=wait_random(min=1, max=2))
-    def post(self, api_url, data=None):
+    @retry(reraise=True, stop=stop_after_attempt(5),
+           wait=wait_random(min=1, max=2))
+    def post(self, api_url, data=None, validator=True):
         """Send an post request and return data object if no error occurred.
 
         Request processing through the decorator, if the request fails more
         than five times, then the exception is ran out.
 
         Args:
-            api_url (str): The URL address of the corresponding action network
-                Request.
-                e.g.:
-                    /api/render/common/queryPlatforms
-                    /api/render/user/queryUserProfile
-                    /api/render/user/queryUserSetting
+            api_url (rayvision_api.api.url.URL or str): The URL address of the
+                corresponding action network Request.
+                    e.g.:
+                        /api/render/common/queryPlatforms
+                        /api/render/user/queryUserProfile
+                        /api/render/user/queryUserSetting
             data (dict, optional): Request data.
+            validator (bool, optional): Validator the data.
 
         Returns:
             dict or List: Response data.
@@ -76,6 +83,14 @@ class Connect(object):
 
         """
         data = data or {}
+
+        # if isinstance(api_url, URL):
+        #     schema_name = api_url.name
+        # else:
+        schema_name = api_url.split("/")[-1]
+
+        if validator:
+            data = validate_data(data, schema_name)
         url = self.assemble_api_url(self.domain, api_url,
                                     protocol=self._protocol)
         headers = self._handle_headers(api_url, data)
@@ -90,7 +105,7 @@ class Connect(object):
         if code != 200:
             raise RayvisionAPIError(code, json_response['message'],
                                     response.url)
-        return json_response['data']
+        return json_response["data"]
 
     def _handle_headers(self, api_url, data):
         """Add the necessary parameters to the request header.
@@ -115,9 +130,10 @@ class Connect(object):
 
         """
         headers = copy.deepcopy(self._headers)
-        headers['UTCTimestamp'] = utils.generate_timestamp()
-        headers['nonce'] = utils.generate_nonce()
-        msg = utils.generate_headers_body_str(self.domain, api_url,
-                                              headers, data)
-        headers['signature'] = utils.generate_signature(self._access_key, msg)
+        headers['UTCTimestamp'] = str(int(time.time()))
+        headers['nonce'] = signature.generate_nonce()
+        msg = signature.generate_headers_body_str(self.domain, api_url,
+                                                  headers, data)
+        headers['signature'] = signature.generate_signature(self._access_key,
+                                                            msg)
         return headers

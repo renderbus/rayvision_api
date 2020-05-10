@@ -1,0 +1,4 @@
+cgId:
+  type: integer
+osName:
+  type: string

@@ -18,6 +18,7 @@ from rayvision_api.constants import MODIFIABLE_PARAM
 from rayvision_api.exception import RayvisionError
 from rayvision_api.utils import json_load
 
+
 # pylint: disable=useless-object-inheritance
 class RayvisionCheck(object):
     """Check the analysis results."""
@@ -60,7 +61,8 @@ class RayvisionCheck(object):
         """
         if not workspace:
             if "win" in sys.platform.lower():
-                workspace = os.path.join(os.environ["USERPROFILE"], "renderfarm_sdk")
+                workspace = os.path.join(os.environ["USERPROFILE"],
+                                         "renderfarm_sdk")
             else:
                 workspace = os.path.join(os.environ["HOME"], "renderfarm_sdk")
         else:
@@ -109,11 +111,13 @@ class RayvisionCheck(object):
         user_id = task_info["task_info"].get("task_id", None)
         project_id = task_info["task_info"].get("task_id", None)
         if not bool(task_id):
-            task_info["task_info"]["task_id"] = self.api.get_task_id()
+            task_info["task_info"]["task_id"] = self.api._get_task_id()
         if not bool(user_id):
             task_info["task_info"]["user_id"] = self.api.get_user_id()
         if not bool(project_id):
-            task_info["task_info"]["project_id"] = self.api.check_and_add_project_name(task_info["task_info"]["project_name"])
+            task_info["task_info"][
+                "project_id"] = self.api.check_and_add_project_name(
+                task_info["task_info"]["project_name"])
         return task_info
 
     def execute(self, task_json, upload_json, asset_json="", is_cover=True):
@@ -126,7 +130,9 @@ class RayvisionCheck(object):
                              by default 'True'.
 
         """
-        tmp_dir_name = self.check_analyze(analyze=self.analyze, workspace=os.path.dirname(task_json), is_cover=is_cover)
+        tmp_dir_name = self.check_analyze(analyze=self.analyze,
+                                          workspace=os.path.dirname(task_json),
+                                          is_cover=is_cover)
         logging.info("json_path ==> %s" % tmp_dir_name)
         task_info = json_load(task_json)
         upload_info = json_load(upload_json)
@@ -143,8 +149,11 @@ class RayvisionCheck(object):
 
     def write(self):
         """Check and write to a json file."""
-        scene_info_render = self.task_info.get("scene_info_render") or self.task_info["scene_info"]
-        self._edit_param_and_write(scene_info_render, self.task_info["task_info"], self.upload_info)
+        scene_info_render = self.task_info.get("scene_info_render") or \
+                            self.task_info["scene_info"]
+        self._edit_param_and_write(scene_info_render,
+                                   self.task_info["task_info"],
+                                   self.upload_info)
         self.logger.info('[Rayvision_utils check end .....]')
         return self.task_info["task_info"]["task_id"]
 

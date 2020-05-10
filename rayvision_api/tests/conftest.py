@@ -13,8 +13,6 @@ import re
 # pylint: disable=import-error
 import pytest
 
-from rayvision_api.task.handle import RayvisionTask
-
 
 @pytest.fixture(name='user_info_dict')
 def user_info():
@@ -31,6 +29,7 @@ def user_info():
 @pytest.fixture()
 def mock_requests(requests_mock, user_info_dict):
     """Decorator, simulate the request, request API."""
+
     def _mock_requests(data):
         data_ = {
             'code': 200,
@@ -94,7 +93,7 @@ def render_env():
 @pytest.fixture()
 def rayvision_connect(user_info_dict):
     """Create connect API object."""
-    from rayvision_api.connect import Connect
+    from rayvision_api.api import Connect
     user_info_dict['headers'] = {'version': 'dev'}
     return Connect(**user_info_dict)
 
@@ -102,7 +101,8 @@ def rayvision_connect(user_info_dict):
 @pytest.fixture()
 def task(task_info, mocker):
     """Create an RayvisionTask object."""
-    mocker_task_id = mocker.patch.object(RayvisionTask, 'get_task_id')
+    from rayvision_api.task.handle import RayvisionTask
+    mocker_task_id = mocker.patch.object(RayvisionTask, '_get_task_id')
     mocker_task_id.return_value = '159753'
     mocker_user_id = mocker.patch.object(RayvisionTask, 'get_user_id')
     mocker_user_id.return_value = '5282582'

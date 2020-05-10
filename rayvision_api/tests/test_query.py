@@ -3,14 +3,14 @@
 # pylint: disable=import-error
 import pytest
 
-from rayvision_api.exception import RayvisionAPIError
-from rayvision_api.operators import Query
+from rayvision_api.api import RayvisionAPIError
+from rayvision_api.api import QueryOperator
 
 
 @pytest.fixture()
 def fixture_query(rayvision_connect):
     """Get a Query object."""
-    return Query(rayvision_connect)
+    return QueryOperator(rayvision_connect)
 
 
 # pylint: disable=redefined-outer-name
@@ -26,11 +26,11 @@ def test_platforms(fixture_query, mock_requests):
 
 def test_error_detail(fixture_query, mock_requests):
     """Test we can get correct error message."""
-    mock_requests({'code': 200, 'data': [{'code': '123',
+    mock_requests({'code': 200, 'data': [{'code': 12345,
                                           'solutionPath': 'c:/tests.com'}]})
-    assert fixture_query.error_detail('data')[0]['code'] == '123'
-    assert fixture_query.error_detail('data')[0]['solutionPath'] == (
-        'c:/tests.com')
+    details = fixture_query.error_detail(12345)
+    assert details[0]['code'] == 12345
+    assert details[0]['solutionPath'] == 'c:/tests.com'
 
 
 def test_get_task_list(fixture_query, mock_requests):

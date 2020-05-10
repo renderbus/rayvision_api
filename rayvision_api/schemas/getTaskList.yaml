@@ -1,0 +1,6 @@
+pageNum:
+  type: interger
+pageSize:
+  type: interger
+statusList:
+  type: list

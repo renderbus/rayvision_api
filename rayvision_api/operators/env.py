@@ -1,8 +1,6 @@
 """Set the rendering environment configuration."""
 
-from cattr import unstructure
-
-from rayvision_api import constants, fields
+from rayvision_api import constants
 
 
 class RenderEnv(object):
@@ -12,11 +10,11 @@ class RenderEnv(object):
         """Initialize instance."""
         self._connect = connect
 
-    def add_render_env(self, render_env):
+    def add_render_env(self, data):
         """Adjust user rendering environment configuration.
 
         Args:
-            render_env (dict): Rendering environment configuration.
+            data (dict): Rendering environment configuration.
                 e.g.:
                     {
                         'cgId': "2000",
@@ -36,16 +34,14 @@ class RenderEnv(object):
                     }
 
         """
-        if isinstance(render_env, dict):
-            render_env = fields.Env(**render_env)
-        data = unstructure(render_env)
-        return self._connect.post(constants.ADD_RENDER_ENV, data)
 
-    def update_render_env(self, render_env):
+        return self._connect.post(self._connect.url.addRenderEnv, data)
+
+    def update_render_env(self, data):
         """Modify the user rendering environment configuration.
 
         Args:
-            render_env (dict): Rendering environment configuration.
+            data (dict): Rendering environment configuration.
                 e.g.:
                     {
                         'cgId': "2000",
@@ -58,10 +54,8 @@ class RenderEnv(object):
                     }.
 
         """
-        if isinstance(render_env, dict):
-            render_env = fields.Env(**render_env)
-        data = unstructure(render_env)
-        return self._connect.post(constants.UPDATE_RENDER_ENV, data)
+        return self._connect.post(self._connect.url.updateRenderEnv,
+                                  data)
 
     def delete_render_env(self, edit_name):
         """Delete user rendering environment configuration.
@@ -73,7 +67,7 @@ class RenderEnv(object):
         data = {
             'editName': edit_name
         }
-        return self._connect.post(constants.DELETE_RENDER_ENV, data)
+        return self._connect.post(self._connect.url.deleteRenderEnv, data)
 
     def set_default_render_env(self, edit_name):
         """Set the default render environment configuration.
@@ -85,7 +79,7 @@ class RenderEnv(object):
         data = {
             'editName': edit_name
         }
-        return self._connect.post(constants.SET_DEFAULT_RENDER_ENV, data)
+        return self._connect.post(self._connect.url.setDefaultRenderEnv, data)
 
     def get_render_env(self, name):
         """Get the user rendering environment configuration.
@@ -136,4 +130,4 @@ class RenderEnv(object):
         """
         cg_id = constants.DCC_ID_MAPPINGS[name]
         data = {'cgId': cg_id}
-        return self._connect.post(constants.GET_RENDER_ENV, data)
+        return self._connect.post(self._connect.url.getRenderEnv, data)
