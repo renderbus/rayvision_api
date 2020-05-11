@@ -46,7 +46,6 @@ class RayvisionAPI(object):
         self.query = Query(connect)
         self.tag = Tag(connect)
         self.env = RenderEnv(connect)
-        self.project = Tag(connect)
 
         try:
             self._login()
