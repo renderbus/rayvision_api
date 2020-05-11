@@ -366,7 +366,7 @@ class Query(object):
         """
         if bool(name) and bool(name.strip()):
             if isinstance(name, str):
-                cg_id = constants.DCC_ID_MAPPINGS[name.strip().lower()]
+                cg_id = constants.DCC_ID_MAPPINGS[name.strip()]
             else:
                 raise TypeError("plugin 'name' must be string")
         else:
