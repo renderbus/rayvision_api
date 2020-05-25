@@ -1,0 +1,5 @@
+newName:
+  type: string
+  required: True
+status:
+  type: integer

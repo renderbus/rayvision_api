@@ -1,0 +1,8 @@
+taskId:
+  type: integer
+searchKeyword:
+  type: string
+pageNum:
+  type: integer
+pageSize:
+  type: integer

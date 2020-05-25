@@ -1,13 +1,16 @@
 """API operation on tags."""
 
-from rayvision_api import constants
 
-
-class Tag(object):
+class TagOperator(object):
     """Task tag settings."""
 
     def __init__(self, connect):
-        """Initialize instance."""
+        """Initialize instance.
+
+        Args:
+            connect (rayvision_api.api.connect.Connect): The connect instance.
+
+        """
         self._connect = connect
 
     def add_label(self, new_name, status=1):
@@ -22,7 +25,7 @@ class Tag(object):
             'newName': new_name,
             'status': status
         }
-        return self._connect.post(constants.ADD_LABEL, data)
+        return self._connect.post(self._connect.url.addLabel, data)
 
     def delete_label(self, del_name):
         """Delete custom label.
@@ -31,7 +34,8 @@ class Tag(object):
             del_name (str): The name of the label to be deleted.
 
         """
-        return self._connect.post(constants.DELETE_LABEL, {'delName': del_name})
+        data = {'delName': del_name}
+        return self._connect.post(self._connect.url.deleteLabel, data)
 
     def get_label_list(self):
         """Get custom labels.
@@ -49,7 +53,8 @@ class Tag(object):
                     }
 
         """
-        return self._connect.post(constants.GET_LABEL_LIST)
+        return self._connect.post(self._connect.url.getLabelList,
+                                  validator=False)
 
     def get_project_list(self):
         """Get custom labels.

@@ -1,0 +1,9 @@
+taskId:
+  type: integer
+  required: True
+fileName:
+  type: string
+  required: True
+content:
+  type: string
+  required: True

@@ -1,0 +1,11 @@
+labels:
+  required: False
+  type: list
+count:
+  required: True
+  type: integer
+taskUserLevel:
+  required: True
+  type: integer
+outUserId:
+  type: integer

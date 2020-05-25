@@ -1,0 +1,6 @@
+id:
+  type: integer
+  required: True
+frameStatus:
+  type: integer
+  required: True

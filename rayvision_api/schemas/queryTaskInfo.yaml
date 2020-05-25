@@ -1,0 +1,3 @@
+taskIds:
+  type: list
+  required: True

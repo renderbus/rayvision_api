@@ -4,13 +4,13 @@
 import pytest
 
 from rayvision_api.exception import RayvisionAPIError
-from rayvision_api.operators import Tag
+from rayvision_api.operators import TagOperator
 
 
 @pytest.fixture()
 def fixture_tag(rayvision_connect):
     """Get a Tag object."""
-    return Tag(rayvision_connect)
+    return TagOperator(rayvision_connect)
 
 
 # pylint: disable=redefined-outer-name

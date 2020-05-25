@@ -5,11 +5,16 @@ import sys
 from rayvision_api import constants
 
 
-class Query(object):
+class QueryOperator(object):
     """API query operation."""
 
     def __init__(self, connect):
-        """Initialize instance."""
+        """Initialize instance.
+
+        Args:
+            connect (rayvision_api.api.connect.Connect): The connect instance.
+
+        """
         self._connect = connect
 
     def platforms(self):
@@ -26,17 +31,18 @@ class Query(object):
                      ]
 
         """
-        zone = 1 if 'renderbus' in self._connect.domain.lower() else 2
-        return self._connect.post(constants.QUERY_PLATFORMS, {'zone': zone})
+        zone = 1 if "renderbus" in self._connect.domain.lower() else 2
+        return self._connect.post(self._connect.url.queryPlatforms,
+                                  {'zone': zone})
 
     def error_detail(self, code, language='0'):
         r"""Get analysis error code.
 
         Args:
-            code (str): Required value, error code.
+            code (string): Required value, error code.
                 e.g.:
-                    "10010".
-                    "15000".
+                    10010.
+                    15000.
             language (str, optional): Not required, language,
                 0: Chinese (default) 1: English.
 
@@ -68,12 +74,10 @@ class Query(object):
             'code': code,
             'language': language
         }
-        details = self._connect.post(constants.QUERY_ERROR_DETAIL, data)
-        if details:
-            return details
-        return None
+        return self._connect.post(self._connect.url.queryErrorDetail, data)
 
-    def get_task_list(self, page_num=1, page_size=2, status_list=None, search_keyword=None,
+    def get_task_list(self, page_num=1, page_size=2, status_list=None,
+                      search_keyword=None,
                       start_time=None, end_time=None):
         """Get task list.
 
@@ -116,28 +120,15 @@ class Query(object):
             'pageNum': page_num,
             'pageSize': page_size
         }
-        if bool(status_list):
-            if isinstance(status_list, list):
-                data['statusList'] = status_list
-            else:
-                raise TypeError("status_list must be list")
-        if bool(search_keyword):
-            if isinstance(search_keyword, str):
-                data['searchKeyword'] = search_keyword
-            else:
-                raise TypeError("search_keyword must be string")
-        if bool(start_time):
-            if isinstance(start_time, str):
-                data['startTime'] = start_time
-            else:
-                raise TypeError("start_time must be string")
-        if bool(end_time):
-            if isinstance(end_time, str):
-                data['endTime'] = end_time
-            else:
-                raise TypeError("end_time must be string")
-
-        return self._connect.post(constants.GET_TASK_LIST, data)
+        if status_list:
+            data['statusList'] = status_list
+        if search_keyword:
+            data['searchKeyword'] = search_keyword
+        if start_time:
+            data['startTime'] = start_time
+        if end_time:
+            data['endTime'] = end_time
+        return self._connect.post(self._connect.url.getTaskList, data)
 
     def task_frames(self, task_id, page_num, page_size,
                     search_keyword=None):
@@ -184,7 +175,7 @@ class Query(object):
         }
         if search_keyword:
             data['searchKeyword'] = search_keyword
-        return self._connect.post(constants.QUERY_TASK_FRAMES, data)
+        return self._connect.post(self._connect.url.queryTaskFrames, data)
 
     def all_frame_status(self):
         """Get the overview of task rendering frame.
@@ -201,7 +192,8 @@ class Query(object):
                     }
 
         """
-        return self._connect.post(constants.QUERY_ALL_FRAME_STATUS)
+        return self._connect.post(self._connect.url.queryAllFrameStats,
+                                  validator=False)
 
     def restart_failed_frames(self, task_param_list):
         """Re-submit the failed frame.
@@ -213,7 +205,7 @@ class Query(object):
         data = {
             'taskIds': task_param_list
         }
-        return self._connect.post(constants.RESTART_FAILED_FRAMES, data)
+        return self._connect.post(self._connect.url.restartFailedFrames, data)
 
     def restart_frame(self, task_id, select_all, ids_list=None):
         """Re-submit the specified frame.
@@ -238,7 +230,7 @@ class Query(object):
         else:
             data['ids'] = []
 
-        return self._connect.post(constants.RESTART_FRAME, data)
+        return self._connect.post(self._connect.url.restartFrame, data)
 
     def task_info(self, task_ids_list):
         """Get task details.
@@ -300,7 +292,7 @@ class Query(object):
         data = {
             'taskIds': task_ids_list
         }
-        return self._connect.post(constants.QUERY_TASK_INFO, data)
+        return self._connect.post(self._connect.url.queryTaskInfo, data)
 
     def supported_software(self):
         """Get supported rendering software.
@@ -325,7 +317,8 @@ class Query(object):
                     }
 
         """
-        return self._connect.post(constants.QUERY_SUPPORTED_SOFTWARE)
+        return self._connect.post(self._connect.url.querySupportedSoftware,
+                                  validator=False)
 
     def supported_plugin(self, name):
         """Get supported rendering software plugins.
@@ -364,17 +357,10 @@ class Query(object):
                     }
 
         """
-        if bool(name) and bool(name.strip()):
-            if isinstance(name, str):
-                cg_id = constants.DCC_ID_MAPPINGS[name.strip()]
-            else:
-                raise TypeError("plugin 'name' must be string")
-        else:
-            raise TypeError("plugin 'name' required, cannot be None or null characters")
+        cg_id = constants.DCC_ID_MAPPINGS[name.strip()]
         platform = "windows" if sys.platform.startswith("win") else "linux"
         data = {'cgId': cg_id, 'osName': platform}
-
-        return self._connect.post(constants.QUERY_SUPPORTED_PLUGIN, data)
+        return self._connect.post(self._connect.url.querySupportedPlugin, data)
 
     def get_transfer_server_msg(self):
         """Get the user rendering environment configuration.
@@ -394,14 +380,11 @@ class Query(object):
                     }
 
         """
-        zone = 1
-        if "renderbus" not in self._connect.domain:
-            zone = 2
+        zone = 1 if "renderbus" not in self._connect.domain else 2
         data = {
-            'zone': zone
+            "zone": zone
         }
-
-        return self._connect.post(constants.GET_TRANSFER_SERVER_MSG, data)
+        return self._connect.post(self._connect.url.getTransferServerMsg, data)
 
     def get_raysync_user_key(self):
         """Get the user rendering environment configuration.
@@ -416,7 +399,7 @@ class Query(object):
                     }
 
         """
-        return self._connect.post(constants.GET_RAYSYNC_USERKEY, {})
+        return self._connect.post(self._connect.url.getRaySyncUserKey, validator=False)
 
     def get_task_processing_img(self, task_id, frame_type=None):
         """Get the task progress diagram,currently only Max software is supported.
@@ -465,11 +448,11 @@ class Query(object):
 
         """
         data = {
-            'taskId': task_id
+            "taskId": task_id
         }
         if frame_type:
-            data['frameType'] = frame_type
-        return self._connect.post(constants.LOAD_TASK_PROCESSING, data)
+            data["frameType"] = frame_type
+        return self._connect.post(self._connect.url.loadTaskProcessImg, data)
 
     def get_frame_thumbnall(self, frame_id, frame_status=4):
         """Load thumbnail.
@@ -491,4 +474,5 @@ class Query(object):
             'id': frame_id,
             'frameStatus': frame_status
         }
-        return self._connect.post(constants.LOADING_FRAME_THUMBNAIL, data)
+        return self._connect.post(self._connect.url.loadingFrameThumbnail,
+                                  data)

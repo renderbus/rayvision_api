@@ -2,15 +2,9 @@
 
 # pylint: disable=import-error
 from pkg_resources import DistributionNotFound, get_distribution
-from rayvision_log import init_logger
 
 # Import local modules
 from rayvision_api.core import RayvisionAPI
-from rayvision_api.constants import PACKAGE_NAME
-
-
-# Initialize the logger.
-init_logger(PACKAGE_NAME)
 
 # All API of the public.
 __all__ = ['RayvisionAPI']

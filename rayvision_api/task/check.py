@@ -10,13 +10,15 @@ import logging
 import os
 import sys
 import time
+
 from past.builtins import long
 
-# Import local modules
-from rayvision_api.utils import exists_or_create
 from rayvision_api.constants import MODIFIABLE_PARAM
 from rayvision_api.exception import RayvisionError
+# Import local modules
+from rayvision_api.utils import exists_or_create
 from rayvision_api.utils import json_load
+
 
 # pylint: disable=useless-object-inheritance
 class RayvisionCheck(object):
@@ -60,7 +62,8 @@ class RayvisionCheck(object):
         """
         if not workspace:
             if "win" in sys.platform.lower():
-                workspace = os.path.join(os.environ["USERPROFILE"], "renderfarm_sdk")
+                workspace = os.path.join(os.environ["USERPROFILE"],
+                                         "renderfarm_sdk")
             else:
                 workspace = os.path.join(os.environ["HOME"], "renderfarm_sdk")
         else:
@@ -109,14 +112,22 @@ class RayvisionCheck(object):
         user_id = task_info["task_info"].get("task_id", None)
         project_id = task_info["task_info"].get("task_id", None)
         if not bool(task_id):
-            task_info["task_info"]["task_id"] = self.api.get_task_id()
+            task_info["task_info"]["task_id"] = self.api.task._generate_task_id()
         if not bool(user_id):
             task_info["task_info"]["user_id"] = self.api.get_user_id()
         if not bool(project_id):
-            task_info["task_info"]["project_id"] = self.api.check_and_add_project_name(task_info["task_info"]["project_name"])
+            task_info["task_info"][
+                "project_id"] = self.api.check_and_add_project_name(
+                task_info["task_info"]["project_name"])
         return task_info
 
-    def execute(self, task_json, upload_json, asset_json="", is_cover=True):
+    def get_json_info(self, data):
+        if isinstance(data, dict):
+            return data
+        elif os.path.isfile(data):
+            return json_load(data)
+
+    def execute(self, task_json, upload_json="", asset_json="", is_cover=True, only_id=True):
         """Check asset configuration information.
 
         Check the scene for problems and filter unwanted configuration
@@ -126,11 +137,13 @@ class RayvisionCheck(object):
                              by default 'True'.
 
         """
-        tmp_dir_name = self.check_analyze(analyze=self.analyze, workspace=os.path.dirname(task_json), is_cover=is_cover)
-        logging.info("json_path ==> %s" % tmp_dir_name)
-        task_info = json_load(task_json)
-        upload_info = json_load(upload_json)
-        asset_info = json_load(asset_json)
+        if not isinstance(task_json, dict):
+            tmp_dir_name = self.check_analyze(analyze=self.analyze,
+                                              workspace=os.path.dirname(task_json),
+                                              is_cover=is_cover)
+        task_info = self.get_json_info(task_json)
+        upload_info = self.get_json_info(upload_json)
+        asset_info = self.get_json_info(asset_json)
         self.logger.info('[Rayvision_utils check start .....]')
         self.task_info = self.check_task_info(task_info)
         self.upload_info = upload_info or {}
@@ -138,15 +151,20 @@ class RayvisionCheck(object):
 
         self.check_error_warn_info()
         self.is_scene_have_error()  # Check error.
-        task_id = self.write()
-        return task_id
+        data = self.write(only_id=only_id)
+        return data
 
-    def write(self):
+    def write(self, only_id=True):
         """Check and write to a json file."""
-        scene_info_render = self.task_info.get("scene_info_render") or self.task_info["scene_info"]
-        self._edit_param_and_write(scene_info_render, self.task_info["task_info"], self.upload_info)
+        scene_info_render = self.task_info.get("scene_info_render") or \
+                            self.task_info["scene_info"]
+        self._edit_param_and_write(scene_info_render,
+                                   self.task_info["task_info"],
+                                   self.upload_info)
+        if only_id:
+            return int(self.task_info["task_info"]["task_id"])
         self.logger.info('[Rayvision_utils check end .....]')
-        return self.task_info["task_info"]["task_id"]
+        return self.task_info, int(self.task_info["task_info"]["task_id"])
 
     def check_error_warn_info(self, language='0'):
         """Check the error in the analysis scenario.
@@ -225,6 +243,13 @@ class RayvisionCheck(object):
 
         return True
 
+    def _write_json(self, data, path):
+        """write to json."""
+
+        if data and path is not None and os.path.isfile(path):
+            with codecs.open(path, "w", "utf-8") as f_json:
+                json.dump(data, f_json, indent=4, ensure_ascii=False)
+
     def _write_to_json_file(self):
         """Update json file.
 
@@ -235,29 +260,34 @@ class RayvisionCheck(object):
                 used in the scene.
 
         """
-        # Write upload.json.
-        if self.upload_info is not None:
-            with codecs.open(self.upload_json,
-                             'w', 'utf-8') as f_upload_json:
-                json.dump(self.upload_info, f_upload_json, indent=4,
-                          ensure_ascii=False)
-
-        # Write task.json.
-        with codecs.open(self.task_json,
-                         'w', 'utf-8') as f_task_json:
-            json.dump(self.task_info, f_task_json, indent=4,
-                      ensure_ascii=False)
-
-        # Write tips.json.
-        if self.tips_info is not None:
-            with codecs.open(self.tips_json,
-                             'w', 'utf-8') as f_tips_json:
-                json.dump(self.tips_info, f_tips_json,
-                          indent=4, ensure_ascii=False)
-
-        # Write asset.json.
-        if self.asset_info is not None:
-            with codecs.open(self.asset_json,
-                             'w', 'utf-8') as f_asset_json:
-                json.dump(self.asset_info, f_asset_json,
-                          indent=4, ensure_ascii=False)
+        # # Write upload.json.
+        # if self.upload_info is not None and os.path.isfile(self.upload_json):
+        #     with codecs.open(self.upload_json,
+        #                      'w', 'utf-8') as f_upload_json:
+        #         json.dump(self.upload_info, f_upload_json, indent=4,
+        #                   ensure_ascii=False)
+        #
+        # # Write task.json.
+        # and os.path.isfile(self.upload_json)
+        # with codecs.open(self.task_json,
+        #                  'w', 'utf-8') as f_task_json:
+        #     json.dump(self.task_info, f_task_json, indent=4,
+        #               ensure_ascii=False)
+        #
+        # # Write tips.json.
+        # if self.tips_info is not None and not isinstance(self.tips_info, dict):
+        #     with codecs.open(self.tips_json,
+        #                      'w', 'utf-8') as f_tips_json:
+        #         json.dump(self.tips_info, f_tips_json,
+        #                   indent=4, ensure_ascii=False)
+        #
+        # # Write asset.json.
+        # if self.asset_info is not None and not isinstance(self.asset_info, dict):
+        #     with codecs.open(self.asset_json,
+        #                      'w', 'utf-8') as f_asset_json:
+        #         json.dump(self.asset_info, f_asset_json,
+        #                   indent=4, ensure_ascii=False)
+        self._write_json(self.task_info, self.task_json)
+        self._write_json(self.upload_info, self.upload_json)
+        self._write_json(self.asset_info, self.asset_json)
+        self._write_json(self.tips_info, self.tips_json)

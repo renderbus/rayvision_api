@@ -4,13 +4,13 @@
 import pytest
 
 from rayvision_api.exception import RayvisionAPIError
-from rayvision_api.operators import Task
+from rayvision_api.operators import TaskOperator
 
 
 @pytest.fixture()
 def fixture_task(rayvision_connect):
     """Get a Task object."""
-    return Task(rayvision_connect)
+    return TaskOperator(rayvision_connect)
 
 
 # pylint: disable=redefined-outer-name
@@ -113,5 +113,5 @@ def test_update_task_level(fixture_task, mock_requests, task_id, task_level):
         }
     )
     with pytest.raises(RayvisionAPIError) as err:
-        fixture_task.update_task_level(task_id, task_level)
+        fixture_task.update_priority(task_id, task_level)
     assert 'Update task level failed.' in str(err.value)

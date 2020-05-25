@@ -166,3 +166,7 @@ class CompressionFailedError(Exception):
 
 class DecompressionFailedError(Exception):
     """Unzip failed error."""
+
+
+class UploadFileNotSupportError(Exception):
+    """Upload_file_name_only support does_not_support error."""
