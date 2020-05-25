@@ -4,14 +4,14 @@
 import pytest
 
 from rayvision_api.exception import RayvisionAPIError
-from rayvision_api.operators import RenderEnv
+from rayvision_api.operators import RenderEnvOperator
 
 
 # pylint: disable=redefined-outer-name
 @pytest.fixture()
 def fixture_env(rayvision_connect):
     """Initialize the user object."""
-    return RenderEnv(rayvision_connect)
+    return RenderEnvOperator(rayvision_connect)
 
 
 def test_add_render_env(fixture_env, render_env, mock_requests):
@@ -19,7 +19,13 @@ def test_add_render_env(fixture_env, render_env, mock_requests):
     mock_requests(
         {'code': 200,
          'data': {
+             'cgId': 2000,
+             'cgName': 'Maya',
+             'cgVersion': '2018',
+             'renderLayerType': 0,
              'editName': 'tests',
+             'renderSystem': 1,
+             'pluginIds': [2703]
          }})
     assert fixture_env.add_render_env(render_env)['editName'] == 'tests'
 

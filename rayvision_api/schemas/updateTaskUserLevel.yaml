@@ -1,0 +1,6 @@
+taskId:
+  type: integer
+  required: True
+taskUserLevel:
+  type: integer
+  required: True

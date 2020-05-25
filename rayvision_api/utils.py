@@ -16,7 +16,8 @@ import json
 import codecs
 import sys
 
-from .exception import RayvisionError
+from .constants import SUPPORT_UPLOAD_FILE_NAME
+from .exception import RayvisionError, UploadFileNotSupportError
 
 VERSION = sys.version_info[0]
 
@@ -447,3 +448,11 @@ def exists_or_create(folder):
     if not os.path.exists(folder):
         os.makedirs(folder)
     return os.path.exists(folder)
+
+
+def check_file_name(name):
+    if not bool(name):
+        return "task.json"
+    if not name in SUPPORT_UPLOAD_FILE_NAME:
+        raise UploadFileNotSupportError
+    return name

@@ -1,0 +1,7 @@
+cgId:
+  type: integer
+  required: True
+osName:
+  type: string
+  required: True
+  allowed: ["windows", "linux"]

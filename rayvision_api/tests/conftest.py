@@ -7,13 +7,12 @@ References:
     https://docs.pytest.org/en/2.7.3/plugins.html
 
 """
-import os, sys
+import os
 import re
+import sys
 
 # pylint: disable=import-error
 import pytest
-
-from rayvision_api.task.handle import RayvisionTask
 
 
 @pytest.fixture(name='user_info_dict')
@@ -31,6 +30,7 @@ def user_info():
 @pytest.fixture()
 def mock_requests(requests_mock, user_info_dict):
     """Decorator, simulate the request, request API."""
+
     def _mock_requests(data):
         data_ = {
             'code': 200,
@@ -97,19 +97,6 @@ def rayvision_connect(user_info_dict):
     from rayvision_api.connect import Connect
     user_info_dict['headers'] = {'version': 'dev'}
     return Connect(**user_info_dict)
-
-
-@pytest.fixture()
-def task(task_info, mocker):
-    """Create an RayvisionTask object."""
-    mocker_task_id = mocker.patch.object(RayvisionTask, 'get_task_id')
-    mocker_task_id.return_value = '159753'
-    mocker_user_id = mocker.patch.object(RayvisionTask, 'get_user_id')
-    mocker_user_id.return_value = '5282582'
-    mocker_user_id = mocker.patch.object(RayvisionTask,
-                                         'check_and_add_project_name')
-    mocker_user_id.return_value = '9436361'
-    return RayvisionTask(**task_info)
 
 
 @pytest.fixture()

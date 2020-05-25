@@ -1,0 +1,9 @@
+domain:
+  type: string
+platform:
+  type: string
+access_id:
+  type: string
+access_key:
+  type: string
+
