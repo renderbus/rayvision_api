@@ -476,3 +476,20 @@ class QueryOperator(object):
         }
         return self._connect.post(self._connect.url.loadingFrameThumbnail,
                                   data)
+
+    def opera_user_label(self, task_id, status, label_name=None, type=0):
+        """"""
+
+        data = {
+            "taskId": task_id,
+            "status": status,
+            "type": type,
+        }
+        if type == 1:
+            data.update(newName=label_name)
+        elif type == 2:
+            data.update(delName=label_name)
+        else:
+            data.update(type=0)
+            
+        return self._connect.post(self._connect.url.operateUserLabel, data, validator=False)

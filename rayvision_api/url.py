@@ -43,3 +43,5 @@ class ApiUrl(str, Enum):
     loadingFrameThumbnail = '/api/render/task/loadingFrameThumbnail'
     fullSpeed = '/api/render/task/fullSpeed'
     taskJsonFile = '/api/render/task/taskJsonFile'
+    operateUserLabel = '/api/rendering/task/common/operateUserLabel'
+    getTransferConfig = '/api/render/task/getTransferConfig'
