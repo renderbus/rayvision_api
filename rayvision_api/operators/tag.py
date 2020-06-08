@@ -23,7 +23,7 @@ class TagOperator(object):
         """
         data = {
             'newName': new_name,
-            'status': status
+            'status': int(status)
         }
         return self._connect.post(self._connect.url.addLabel, data)
 

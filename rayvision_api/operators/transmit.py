@@ -24,3 +24,9 @@ class TransmitOperator(object):
         }
 
         return self._connect.post(self._connect.url.taskJsonFile, data=data)
+
+    def get_transfer_config(self):
+        """upload task json file.upload_json_format
+
+        """
+        return self._connect.post(self._connect.url.getTransferConfig, validator=False)
