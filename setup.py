@@ -20,6 +20,9 @@ setup(
     packages=find_packages('.'),
     description=('A Python-based API for Using Renderbus cloud rendering '
                  'service.'),
+    package_data={
+        'rayvision_api': ['./schemas/*']
+    },
     entry_points={},
     install_requires=list(parse_requirements('requirements.txt')),
     classifiers=[
