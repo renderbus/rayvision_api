@@ -149,7 +149,8 @@ class RayvisionCheck(object):
         self.upload_info = upload_info or {}
         self.asset_info = asset_info
 
-        self.check_error_warn_info()
+        language = "0" if self.api._connect.domain.startswith("task") else "1"
+        self.check_error_warn_info(language=language)
         self.is_scene_have_error()  # Check error.
         data = self.write(only_id=only_id)
         return data
