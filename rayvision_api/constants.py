@@ -54,7 +54,7 @@ CG_SETTING = {
 
 TASK_INFO = {
     'task_info': {
-        'enable_layered': '0',
+        'enable_layered': '1',
         'input_cg_file': '',
         'is_picture': '0',
         'task_id': '',

@@ -71,3 +71,27 @@ class TagOperator(object):
 
         """
         return self.get_label_list()['projectNameList']
+
+    def add_task_tag(self, tag, task_ids):
+        """Add a custom task tag.
+                Args:
+                    tag (str): Label name.
+                    task_ids (list[int], optional): task id list.
+
+        """
+        data = {
+            "label": tag,
+            "taskIds": task_ids
+        }
+        return self._connect.post(self._connect.url.addTaskLabel, data)
+
+    def delete_task_tag(self, tag_ids):
+        """del custom task label.
+                Args:
+                    label_ids (list[int], optional): lable id list.
+
+        """
+        data = {
+            "labelIds": tag_ids
+        }
+        return self._connect.post(self._connect.url.deleteTaskLabel, data)
