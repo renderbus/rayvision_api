@@ -45,3 +45,5 @@ class ApiUrl(str, Enum):
     taskJsonFile = '/api/render/task/taskJsonFile'
     operateUserLabel = '/api/rendering/task/common/operateUserLabel'
     getTransferConfig = '/api/render/task/getTransferConfig'
+    addTaskLabel = '/api/render/task/addTaskLabel'
+    deleteTaskLabel = '/api/render/task/deleteTaskLabel'

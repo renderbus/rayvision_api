@@ -37,7 +37,7 @@ print(platform)
 # print(user_transfer_bid)
 #
 # print("======= 创建任务号 =============")
-# create_task_id = api.task.create_task(count=1, task_user_level=50, labels=["label_test1"])
+create_task_id = api.task.create_task(count=1, task_user_level=50, labels=["label_test1"])
 # print(create_task_id)
 
 # print("======= 提交任务 =============")
