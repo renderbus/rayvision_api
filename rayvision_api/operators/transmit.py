@@ -13,7 +13,7 @@ class TransmitOperator(object):
         """
         self._connect = connect
 
-    def upload_json_content(self, task_id, file_name, content):
+    def upload_json_content(self, task_id, content, file_name="task.json"):
         """upload task json file.upload_json_format
 
         """
@@ -29,4 +29,4 @@ class TransmitOperator(object):
         """upload task json file.upload_json_format
 
         """
-        return self._connect.post(self._connect.url.getTransferConfig, validator=False)
+        return self._connect.post(self._connect.url.getConfig, validator=False)

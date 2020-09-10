@@ -1,0 +1,9 @@
+cgId:
+  type: integer
+  required: False
+cgIds:
+  type: list
+  required: False
+osName:
+  type: integer
+  allowed: [0, 1]

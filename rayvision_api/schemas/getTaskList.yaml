@@ -4,3 +4,6 @@ pageSize:
   type: integer
 statusList:
   type: list
+  schema: {
+    type: integer
+  }

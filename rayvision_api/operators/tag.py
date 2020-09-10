@@ -25,7 +25,7 @@ class TagOperator(object):
             'newName': new_name,
             'status': int(status)
         }
-        return self._connect.post(self._connect.url.addLabel, data)
+        return self._connect.post(self._connect.url.add, data)
 
     def delete_label(self, del_name):
         """Delete custom label.
@@ -35,7 +35,7 @@ class TagOperator(object):
 
         """
         data = {'delName': del_name}
-        return self._connect.post(self._connect.url.deleteLabel, data)
+        return self._connect.post(self._connect.url.delete, data)
 
     def get_label_list(self):
         """Get custom labels.
@@ -53,8 +53,8 @@ class TagOperator(object):
                     }
 
         """
-        return self._connect.post(self._connect.url.getLabelList,
-                                  validator=False)
+
+        return self._connect.post(self._connect.url.getList, validator=False)
 
     def get_project_list(self):
         """Get custom labels.

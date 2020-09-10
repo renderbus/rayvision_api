@@ -9,3 +9,9 @@ taskUserLevel:
   type: integer
 outUserId:
   type: integer
+cloneOriginalId:
+  required: False
+  type: integer
+artist:
+  required: False
+  type: string

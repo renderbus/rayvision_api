@@ -51,7 +51,7 @@ def test_stop_task(fixture_task, mock_requests):
         }
     )
     with pytest.raises(RayvisionAPIError) as err:
-        task_param_list = ["336463", "469733"]
+        task_param_list = [336463, 469733]
         fixture_task.stop_task(task_param_list)
     assert 'Stop task failed.' in str(err.value)
 
@@ -65,7 +65,7 @@ def test_start_task(fixture_task, mock_requests):
         }
     )
     with pytest.raises(RayvisionAPIError) as err:
-        task_param_list = ["456463", "469633"]
+        task_param_list = [456463, 469633]
         fixture_task.start_task(task_param_list)
     assert 'Start task failed.' in str(err.value)
 
@@ -79,7 +79,7 @@ def test_abort_task(fixture_task, mock_requests):
         }
     )
     with pytest.raises(RayvisionAPIError) as err:
-        task_param_list = ["456463", "462582"]
+        task_param_list = [456463, 462582]
         fixture_task.abort_task(task_param_list)
     assert 'Abort task failed.' in str(err.value)
 
@@ -93,7 +93,7 @@ def test_delete_task(fixture_task, mock_requests):
         }
     )
     with pytest.raises(RayvisionAPIError) as err:
-        task_param_list = ["996463", "462582"]
+        task_param_list = [996463, 462582]
         fixture_task.delete_task(task_param_list)
     assert 'Delete task failed.' in str(err.value)
 

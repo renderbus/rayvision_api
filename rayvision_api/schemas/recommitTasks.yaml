@@ -4,3 +4,9 @@ taskIds:
   schema: {
     type: integer
   }
+status:
+  type: list
+  required: False
+  schema: {
+    type: integer
+  }

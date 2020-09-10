@@ -32,7 +32,7 @@ HEADERS = {
     'UTCTimestamp': '',
     'nonce': '',
     'signature': '',
-    'version': '1.0.0',
+    'version': '2.0.0',
     'Content-Type': 'application/json'
 }
 
@@ -108,10 +108,3 @@ MODIFIABLE_PARAM = [
 
 
 KEYS = ["layers", "scene_info_render", "task_info", "scene_info", "software_config"]
-
-SUPPORT_UPLOAD_FILE_NAME = [
-    "task.json",
-    "upload.json",
-    "asset.json",
-    "tips.json"
-]

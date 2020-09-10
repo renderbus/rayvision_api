@@ -23,7 +23,9 @@ class TaskOperator(object):
                     count=1,
                     task_user_level=50,
                     out_user_id=None,
-                    labels=None):
+                    labels=None,
+                    clone_original_id=None,
+                    artist=None):
         """Create a task ID.
 
         Args:
@@ -33,6 +35,8 @@ class TaskOperator(object):
             out_user_id (int, optional): Non-required, external user ID, used
                 to distinguish users accessing third parties.
             labels (list or tuple, optional): Custom task labels.
+            clone_original_id (int, optional): Clone the original task ID.
+            artist (str, optional): producer.
 
         Returns:
             dict: The information of the task.
@@ -52,6 +56,10 @@ class TaskOperator(object):
             data['outUserId'] = out_user_id
         if labels:
             data['labels'] = labels
+        if clone_original_id:
+            data['cloneOriginalId'] = int(clone_original_id)
+        if artist:
+            data['artist'] = artist
         return self._connect.post(self._connect.url.createTask, data)
 
     def _generate_task_id(self):
@@ -91,32 +99,25 @@ class TaskOperator(object):
         """
         return self._generate_task_id()
 
-    def submit_task(self, task_id=None,
-                    asset_lsolation_model=None,
-                    out_user_id=None,
+    def submit_task(self, task_id,
+                    producer=None,
                     only_id=False):
         """Submit a task to rayvision render farm.
 
         Args:
             task_id (int): Submit task ID.
-            asset_lsolation_model (str): Asset isolation type, Optional value,
-                default is null, optional value:'TASK_ID_MODEL' or 'OUT_USER_MODEL'.
-            out_user_id (str): The asset isolates the user ID, Optional value,
-                when asset_lsolation_model='OUT_USER_MODEL' ,'out_user_id'
-                cant be empty.
+            producer (str, optional): Producer.
 
         """
         data = {
-            "taskId": task_id or self.task_id
+            "taskId": task_id,
         }
-        if asset_lsolation_model:
-            data["assetIsolationModel"] = asset_lsolation_model
-        if out_user_id:
-            data["outUserId"] = out_user_id.strip()
+        if producer:
+            data["producer"] = producer
 
-        task_info = self._connect.post(self._connect.url.submitTask, data)
+        task_info = self._connect.post(self._connect.url.task, data)
         if only_id:
-            return self.task_id
+            return task_id
         self._has_submit = True
         return task_info
 
@@ -147,7 +148,7 @@ class TaskOperator(object):
             task_param_list (list): Task ID list.
 
         """
-        return self._connect.post(self._connect.url.abortTask,
+        return self._connect.post(self._connect.url.abandonTask,
                                   {self.TASK_PARAM: task_param_list})
 
     def delete_task(self, task_param_list):
@@ -190,7 +191,7 @@ class TaskOperator(object):
             'taskIds': task_id_list,
             'overTime': overtime
         }
-        return self._connect.post(self._connect.url.setOverTimeStop, data)
+        return self._connect.post(self._connect.url.setTaskOverTimeStop, data)
 
     def full_speed(self, task_id_list):
         """Full to render.
@@ -205,4 +206,4 @@ class TaskOperator(object):
         data = {
             'taskIds': task_id_list,
         }
-        return self._connect.post(self._connect.url.fullSpeed, data)
+        return self._connect.post(self._connect.url.fullSpeedRendering, data)

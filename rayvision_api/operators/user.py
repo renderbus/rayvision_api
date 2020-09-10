@@ -108,7 +108,7 @@ class UserOperator(object):
                     }
 
         """
-        return self._connect.post(self._connect.url.getTransferBid,
+        return self._connect.post(self._connect.url.getBid,
                                   validator=False)
 
     def _login(self):
