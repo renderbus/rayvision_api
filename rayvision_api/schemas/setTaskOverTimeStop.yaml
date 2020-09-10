@@ -1,6 +1,9 @@
 taskIds:
   type: list
   required: True
+  schema: {
+    type: integer
+  }
 overTime:
   type: integer
   required: True

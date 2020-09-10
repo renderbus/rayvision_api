@@ -35,7 +35,7 @@ class QueryOperator(object):
         return self._connect.post(self._connect.url.queryPlatforms,
                                   {'zone': zone})
 
-    def error_detail(self, code, language='0'):
+    def error_detail(self, code=None, codes=None, language=0):
         r"""Get analysis error code.
 
         Args:
@@ -43,7 +43,8 @@ class QueryOperator(object):
                 e.g.:
                     10010.
                     15000.
-            language (str, optional): Not required, language,
+            codes (list for int): error codes
+            language (int, optional): Not required, language,
                 0: Chinese (default) 1: English.
 
         Returns:
@@ -71,12 +72,18 @@ class QueryOperator(object):
 
         """
         data = {
-            'code': code,
             'language': language
         }
-        return self._connect.post(self._connect.url.queryErrorDetail, data)
+        if code:
+            data['code'] = code
+        if codes:
+            data['codes'] = codes
+        if not code and not codes:
+            raise AssertionError("code and codes at least one")
 
-    def get_task_list(self, page_num=1, page_size=2, status_list=None,
+        return self._connect.post(self._connect.url.queryAnalyseErrorDetail, data)
+
+    def get_task_list(self, page_num=1, page_size=100, status_list=None,
                       search_keyword=None,
                       start_time=None, end_time=None):
         """Get task list.
@@ -130,7 +137,7 @@ class QueryOperator(object):
             data['endTime'] = end_time
         return self._connect.post(self._connect.url.getTaskList, data)
 
-    def task_frames(self, task_id, page_num, page_size,
+    def task_frames(self, task_id, page_num=1, page_size=100,
                     search_keyword=None):
         """Get task rendering frame details.
 
@@ -195,42 +202,55 @@ class QueryOperator(object):
         return self._connect.post(self._connect.url.queryAllFrameStats,
                                   validator=False)
 
-    def restart_failed_frames(self, task_param_list):
-        """Re-submit the failed frame.
+    def restart_failed_frames(self, task_param_list, status=None):
+        """Replay failed frames for large tasks.
 
         Args:
             task_param_list (list of str): Task ID list.
+            status (list for int): task status
 
         """
         data = {
             'taskIds': task_param_list
         }
-        return self._connect.post(self._connect.url.restartFailedFrames, data)
+        if status:
+            data['status'] = status
+        return self._connect.post(self._connect.url.recommitTasks, data)
 
-    def restart_frame(self, task_id, select_all, ids_list=None):
+    def restart_frame(self, task_id=None, select_all=1, ids_list=None, status=None):
         """Re-submit the specified frame.
 
         Args:
-            task_id (int): Task ID number.
+            task_id (int, optional): Task ID number.
             ids_list (list, optional): Frame ID list, valid when select_all is
                 0.
-            select_all (int): Whether to re-request all,
-                1 all re-raised, 0 specified frame re-request.
-
+            select_all (int, optional): Whether to re-request all,
+                1 represents the user select all operation,
+                0 represents the user is not all selected,
+                taskId is required when filling in 1, or ids is required when filling in 0 or not.
+            status (list for int, optional): Specifies the state of the reframe.
         """
-        data = {
-            'taskIds': task_id,
-            'selectAll': select_all
-        }
-        if bool(ids_list):
-            if isinstance(ids_list, list):
-                data['ids'] = ids_list
+        if select_all == 1:
+            if task_id:
+                data = {
+                    'taskId': task_id,
+                    'selectAll': select_all
+                }
             else:
-                raise TypeError("ids_list must be list type")
+                raise AttributeError("task_id is required when select_all is 1")
         else:
-            data['ids'] = []
+            if ids_list:
+                data = {
+                    'ids': ids_list,
+                    'selectAll': select_all
+                }
+            else:
+                raise AttributeError("ids is required when select_all is 0")
 
-        return self._connect.post(self._connect.url.restartFrame, data)
+        if status:
+            data['status'] = status
+
+        return self._connect.post(self._connect.url.recommitTaskFrames, data)
 
     def task_info(self, task_ids_list):
         """Get task details.
@@ -317,7 +337,7 @@ class QueryOperator(object):
                     }
 
         """
-        return self._connect.post(self._connect.url.querySupportedSoftware,
+        return self._connect.post(self._connect.url.querySoftwareList,
                                   validator=False)
 
     def supported_plugin(self, name):
@@ -360,7 +380,7 @@ class QueryOperator(object):
         cg_id = constants.DCC_ID_MAPPINGS[name.strip()]
         platform = "windows" if sys.platform.startswith("win") else "linux"
         data = {'cgId': cg_id, 'osName': platform}
-        return self._connect.post(self._connect.url.querySupportedPlugin, data)
+        return self._connect.post(self._connect.url.querySoftwareDetail, data)
 
     def get_transfer_server_msg(self):
         """Get the user rendering environment configuration.
@@ -384,7 +404,7 @@ class QueryOperator(object):
         data = {
             "zone": zone
         }
-        return self._connect.post(self._connect.url.getTransferServerMsg, data)
+        return self._connect.post(self._connect.url.getServerInfo, data)
 
     def get_raysync_user_key(self):
         """Get the user rendering environment configuration.
@@ -477,19 +497,19 @@ class QueryOperator(object):
         return self._connect.post(self._connect.url.loadingFrameThumbnail,
                                   data)
 
-    def opera_user_label(self, task_id, status, label_name=None, type=0):
-        """"""
-
-        data = {
-            "taskId": task_id,
-            "status": status,
-            "type": type,
-        }
-        if type == 1:
-            data.update(newName=label_name)
-        elif type == 2:
-            data.update(delName=label_name)
-        else:
-            data.update(type=0)
-            
-        return self._connect.post(self._connect.url.operateUserLabel, data, validator=False)
+    # def opera_user_label(self, task_id, status, label_name=None, type=0):
+    #     """"""
+    #
+    #     data = {
+    #         "taskId": task_id,
+    #         "status": status,
+    #         "type": type,
+    #     }
+    #     if type == 1:
+    #         data.update(newName=label_name)
+    #     elif type == 2:
+    #         data.update(delName=label_name)
+    #     else:
+    #         data.update(type=0)
+    #
+    #     return self._connect.post(self._connect.url.operateUserLabel, data, validator=False)

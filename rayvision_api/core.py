@@ -7,7 +7,7 @@ import os
 from future.moves.urllib.error import HTTPError
 
 from rayvision_api.connect import Connect
-from rayvision_api.constants import PACKAGE_NAME, SUPPORT_UPLOAD_FILE_NAME
+from rayvision_api.constants import PACKAGE_NAME
 from rayvision_api.exception import RayvisionError, RayvisonTaskIdError, UploadFileNotSupportError
 from rayvision_api.operators import QueryOperator
 from rayvision_api.operators import RenderEnvOperator
@@ -16,7 +16,6 @@ from rayvision_api.operators import TaskOperator
 from rayvision_api.operators import TransmitOperator
 from rayvision_api.operators import UserOperator
 from rayvision_api.task.check import RayvisionCheck
-from rayvision_api.utils import check_file_name
 from rayvision_log import init_logger
 
 
@@ -172,24 +171,34 @@ class RayvisionAPI(object):
         return project_id
 
 
-    def submit(self, task_id):
+    def submit(self, task_id, producer=None):
         """Submit a task.
 
         Args:
             task_id (int): Task id.
+            producer (str, optional): Producer.
 
         """
         if not isinstance(task_id, int):
             raise RayvisonTaskIdError(10006, "task_id must int !!!!")
 
-        self.task.submit_task(task_id)
+        self.task.submit_task(task_id, producer)
         return True
 
 
-    def submit_by_data(self, task_info, file_name=None, upload_info="", asset_info=""):
-        task_info, task_id = RayvisionCheck(self).execute(task_info, upload_info, asset_info, only_id=False)
+    def submit_by_data(self, task_info, file_name="task.json", producer=None):
+        """Submit tasks based on json files.
+
+        Args:
+            task_info (string): task.json content.
+            file_name (string, optional): The name of the json file to be uploaded, only support ""
+            producer (string, optional): Producer.
+
+        Returns:
+
+        """
+        task_info, task_id = RayvisionCheck(self).execute(task_info, only_id=False)
         task_info = json.dumps(task_info)
-        file_name = check_file_name(file_name)
         self.transmit.upload_json_content(task_id, file_name=file_name, content=task_info)
-        self.task.submit_task(task_id)
+        self.task.submit_task(task_id, producer)
         return True

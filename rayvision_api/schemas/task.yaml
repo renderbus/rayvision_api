@@ -1,0 +1,4 @@
+taskId:
+  type: integer
+producer:
+  type: string

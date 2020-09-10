@@ -1,0 +1,27 @@
+cgId:
+  type: integer
+  required: True
+cgName:
+  type: string
+  required: True
+cgVersion:
+  type: string
+  required: True
+renderLayerType:
+  type: integer
+  required: False
+editName:
+  type: string
+  required: True
+renderSystem:
+  type: integer
+  required: True
+pluginIds:
+  type: list
+  required: True
+  schema: {
+    type: integer
+  }
+projectPath:
+  type: string
+  required: False

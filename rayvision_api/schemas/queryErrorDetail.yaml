@@ -1,5 +1,0 @@
-code:
-  required: True
-  type: string
-language:
-  type: string

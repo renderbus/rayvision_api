@@ -4,6 +4,7 @@ taskId:
 fileName:
   type: string
   required: True
+  allowed: ["task.json", "upload.json", "asset.json", "tips.json"]
 content:
   type: string
   required: True

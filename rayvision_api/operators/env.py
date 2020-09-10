@@ -40,7 +40,7 @@ class RenderEnvOperator(object):
 
         """
 
-        return self._connect.post(self._connect.url.addRenderEnv, data)
+        return self._connect.post(self._connect.url.addUserPluginConfig, data)
 
     def update_render_env(self, data):
         """Modify the user rendering environment configuration.
@@ -59,7 +59,7 @@ class RenderEnvOperator(object):
                     }.
 
         """
-        return self._connect.post(self._connect.url.updateRenderEnv,
+        return self._connect.post(self._connect.url.editUserPluginConfig,
                                   data)
 
     def delete_render_env(self, edit_name):
@@ -67,12 +67,12 @@ class RenderEnvOperator(object):
 
         Args:
             edit_name (str): Rendering environment custom name.
-
         """
         data = {
             'editName': edit_name
         }
-        return self._connect.post(self._connect.url.deleteRenderEnv, data)
+
+        return self._connect.post(self._connect.url.deleteUserPluginConfig, data)
 
     def set_default_render_env(self, edit_name):
         """Set the default render environment configuration.
@@ -84,18 +84,21 @@ class RenderEnvOperator(object):
         data = {
             'editName': edit_name
         }
-        return self._connect.post(self._connect.url.setDefaultRenderEnv, data)
+        return self._connect.post(self._connect.url.setDefaultUserPluginConfig, data)
 
-    def get_render_env(self, name):
+    def get_render_env(self, name=None, cg_names=None, os_name=1):
         """Get the user rendering environment configuration.
 
         Args:
-            name (str): The name of the DCC.
-            e.g.:
-                maya,
-                houdini,
-                3dsmax
-
+            name (str, optional): The name of the DCC.
+                        e.g.:
+                            maya,
+                            houdini,
+                            3ds Max
+            cg_names (list for str, optional): Software configuration for queries.
+            os_name (int): Operating system selection, default is 1,
+                           0: Linux,
+                           1: windows
         Return:
             list: Software info.
                 e.g.:
@@ -133,6 +136,16 @@ class RenderEnvOperator(object):
                     ]
 
         """
-        cg_id = constants.DCC_ID_MAPPINGS[name]
-        data = {'cgId': cg_id}
-        return self._connect.post(self._connect.url.getRenderEnv, data)
+        data = {}
+        if name:
+            cg_id = constants.DCC_ID_MAPPINGS[name]
+            data = {'cgId': cg_id}
+        if cg_names:
+            if isinstance(cg_names, list):
+                cg_ids = [constants.DCC_ID_MAPPINGS[name] for name in cg_names]
+                data.update({"cgIds": cg_ids})
+            else:
+                raise TypeError("cg_names is must list.")
+        if os_name or os_name == 0:
+            data["osName"] = os_name
+        return self._connect.post(self._connect.url.getUserPluginConfig, data)
