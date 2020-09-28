@@ -3,10 +3,8 @@ Ids:
   required: False
 selectAll:
   type: integer
-  required: False
 taskId:
   type: integer
-  required: False
 status:
   type: list
   required: False
