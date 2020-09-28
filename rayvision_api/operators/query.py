@@ -499,7 +499,7 @@ class QueryOperator(object):
                                   data)
 
     def get_all_frames(self, task_id, start_page=1, end_page=2000, page_size=100):
-        """获取指定任务所有帧详情.
+        """Gets all frame details for the specified task.
 
         Args:
             task_id (int) : small task id
