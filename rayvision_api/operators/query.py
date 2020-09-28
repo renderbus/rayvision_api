@@ -217,11 +217,11 @@ class QueryOperator(object):
             data['status'] = status
         return self._connect.post(self._connect.url.recommitTasks, data)
 
-    def restart_frame(self, task_id=None, select_all=1, ids_list=None, status=None):
+    def restart_frame(self, task_id, select_all=1, ids_list=None, status=None):
         """Re-submit the specified frame.
 
         Args:
-            task_id (int, optional): Task ID number.
+            task_id (int): Task ID number.
             ids_list (list, optional): Frame ID list, valid when select_all is
                 0.
             select_all (int, optional): Whether to re-request all,
@@ -241,6 +241,7 @@ class QueryOperator(object):
         else:
             if ids_list:
                 data = {
+                    'taskId': task_id,
                     'ids': ids_list,
                     'selectAll': select_all
                 }
@@ -497,19 +498,39 @@ class QueryOperator(object):
         return self._connect.post(self._connect.url.loadingFrameThumbnail,
                                   data)
 
-    # def opera_user_label(self, task_id, status, label_name=None, type=0):
-    #     """"""
-    #
-    #     data = {
-    #         "taskId": task_id,
-    #         "status": status,
-    #         "type": type,
-    #     }
-    #     if type == 1:
-    #         data.update(newName=label_name)
-    #     elif type == 2:
-    #         data.update(delName=label_name)
-    #     else:
-    #         data.update(type=0)
-    #
-    #     return self._connect.post(self._connect.url.operateUserLabel, data, validator=False)
+    def get_all_frames(self, task_id, start_page=1, end_page=2000, page_size=100):
+        """Gets all frame details for the specified task.
+
+        Args:
+            task_id (int) : small task id
+            start_page (int) : The start page that you want to query.
+            end_page (int) : The end page that you want to query.
+
+        Returns (dict): all frames detail info.
+
+        """
+        frames_detail = dict()
+        for num in range(int(start_page), int(end_page)+1):
+            task_frame = self.task_frames(task_id=int(task_id), page_num=num, page_size=page_size)
+            if task_frame['items']:
+                for per in task_frame['items']:
+                    frame_index = per["frameIndex"]
+                    frames_detail[frame_index] = per
+            else:
+                break
+        return frames_detail
+
+    def get_custome_frames(self, task_id, restartframes):
+        """Retrieves the frame of the specified task according to the frame。
+
+        Args:
+            task_id (int) : small task id
+            restartframes (list) : The frame number needs to be redrawn.
+                Examples:
+                     ["2-4[1]", "10"]
+
+        """
+        all_frames = self.get_all_frames(task_id)
+        ids = [per["id"] for index, per in all_frames.items() if str(index) in restartframes]
+        restart_frame = self.restart_frame(ids_list=ids, select_all=0, task_id=task_id)
+        return restart_frame
