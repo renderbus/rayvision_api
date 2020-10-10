@@ -109,16 +109,18 @@ class RayvisionCheck(object):
             raise RayvisionError(2000, "task info can't be empty.")
 
         task_id = task_info["task_info"].get("task_id", None)
-        user_id = task_info["task_info"].get("task_id", None)
-        project_id = task_info["task_info"].get("task_id", None)
+        user_id = task_info["task_info"].get("user_id", None)
+        project_id = task_info["task_info"].get("project_id", None)
         if not bool(task_id):
             task_info["task_info"]["task_id"] = self.api.task._generate_task_id()
         if not bool(user_id):
             task_info["task_info"]["user_id"] = self.api.get_user_id()
         if not bool(project_id):
-            task_info["task_info"][
-                "project_id"] = self.api.check_and_add_project_name(
-                task_info["task_info"]["project_name"])
+            if task_info["task_info"].get("project_name"):
+                project_id = self.api.check_and_add_project_name(task_info["task_info"]["project_name"])
+            else:
+                project_id = "0"
+            task_info["task_info"]["project_id"] = project_id
         return task_info
 
     def get_json_info(self, data):
