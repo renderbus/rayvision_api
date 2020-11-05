@@ -1,22 +1,22 @@
 """The utils function of the rayvision api."""
 
-# import built-in models
-from builtins import bytes
 import base64
+import codecs
 import collections
 import copy
 import hashlib
 import hmac
+import json
+import os
 import platform
 import random
 import re
-import time
-import os
-import json
-import codecs
 import sys
+import time
+# import built-in models
+from builtins import bytes
 
-from .exception import RayvisionError, UploadFileNotSupportError
+from .exception import RayvisionError
 
 VERSION = sys.version_info[0]
 
@@ -398,6 +398,45 @@ def check_upload_file(file_path, upload_info):
     return False
 
 
+def walk_files(folder, contains=True):
+    """
+    Get all files in directory recursively
+    @param str folder: the root directory
+    @param bool contains: Whether to include the folder in file path
+    """
+    file_list = []
+    for root, _, files in os.walk(folder):
+        for name in files:
+            if contains:
+                file_list.append(os.path.normpath(os.path.join(root, name)))
+            else:
+                file_list.append(os.path.normpath(os.path.join(root, name).replace(folder + os.sep, '')))
+    return file_list
+
+
+def extract_file(files_path):
+    """
+
+    Args:
+        files_path: upload a dir or files
+
+    Returns: []
+
+    """
+    if isinstance(files_path, list):
+        file_lists = []
+        for path in files_path:
+            if os.path.isdir(path):
+                file_lists.extend(walk_files(path))
+            else:
+                file_lists.append(path)
+        return file_lists
+    elif isinstance(files_path, str):
+        return [files_path]
+    else:
+        RayvisionError(1000005, "files_paths must be type for list or string")
+
+
 def append_to_upload(files_paths, upload_path):
     """Add the asset information you need to upload to upload_info.
 
@@ -406,39 +445,31 @@ def append_to_upload(files_paths, upload_path):
         upload_path (str): Upload json path.
 
     """
-    upload_info = check_and_read(upload_path)
-    if isinstance(files_paths, str):
-        files_paths = files_paths.replace("\\", "/")
-        if not os.path.exists(files_paths):
-            raise RayvisionError(1000004, "{} is not found".format(files_paths))
+    try:
+        if os.path.exists(upload_path):
+            upload_info = check_and_read(upload_path)
+        else:
+            raise RayvisionError(1000006, "{} is not exist".format(upload_path))
+    except ValueError:
+        # If the format of upload.json is incorrect, the original upload.json will be reset automatically
+        upload_info = {
+            "asset": []
+        }
+    upload_files = extract_file(files_paths)
+    for files_path in upload_files:
+        files_path = files_path.replace("\\", "/")
+        if not os.path.exists(files_path):
+            raise RayvisionError(1000004,
+                                 "{} is not exist".format(files_path))
 
-        status = check_upload_file(files_paths, upload_info)
+        status = check_upload_file(files_path, upload_info)
         if status:
-            return
+            continue
 
-        upload_info["asset"].append(
-            {
-                "local": files_paths.replace("\\", "/"),
-                "server": convert_path(files_paths),
-            },
-        )
-    elif isinstance(files_paths, list):
-        for files_path in files_paths:
-            files_path = files_path.replace("\\", "/")
-            if not os.path.exists(files_path):
-                raise RayvisionError(1000004,
-                                     "{} is not found".format(files_path))
-
-            status = check_upload_file(files_path, upload_info)
-            if status:
-                continue
-
-            upload_info["asset"].append({
-                "local": files_path.replace("\\", "/"),
-                "server": convert_path(files_path),
-            })
-    else:
-        raise RayvisionError(1000003, "files_paths must be a str or list.".format(files_paths))
+        upload_info.get("asset", []).append({
+            "local": files_path.replace("\\", "/"),
+            "server": convert_path(files_path),
+        })
 
     json_save(upload_path, upload_info)
 
