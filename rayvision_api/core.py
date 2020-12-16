@@ -153,7 +153,7 @@ class RayvisionAPI(object):
         is_label_exist = False
         project_id = ''
         for _ in range(2):
-            label_dict_list = (self.tag.get_label_list().
+            label_dict_list = (self.tag.get_list(flag=2).
                                get('projectNameList', []))
             for label_dict in label_dict_list:
                 if label_dict['projectName'] == project_name:

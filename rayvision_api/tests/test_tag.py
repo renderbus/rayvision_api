@@ -55,3 +55,17 @@ def test_get_project_list(fixture_tag, mock_requests):
     )
     assert fixture_tag.get_project_list()[0]['projectId'] == 3671
     assert fixture_tag.get_project_list()[0]['projectName'] == 'myLabel'
+
+@pytest.mark.parametrize('flag', [0, 1, 2])
+def test_get_list(fixture_tag, mock_requests, flag):
+    """The test gets the project name interface based on flag"""
+    mock_requests(
+        {'code': 200,
+         'data': {"projectNameList": [
+             {"projectId": 3671,
+              "projectName": "myLabel"
+              }
+         ]}}
+    )
+    assert fixture_tag.get_list(flag)['projectNameList'][0]['projectId'] == 3671
+    assert fixture_tag.get_list(flag)['projectNameList'][0]['projectName'] == 'myLabel'

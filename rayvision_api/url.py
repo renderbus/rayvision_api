@@ -46,3 +46,4 @@ class ApiUrl(str, Enum):
     getConfig = '/api/render/transfer/getConfig'
     addTaskLabel = '/api/render/handle/addTaskLabel'
     deleteTaskLabel = '/api/render/handle/deleteTaskLabel'
+    list = '/api/render/project/list'
