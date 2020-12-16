@@ -95,3 +95,17 @@ class TagOperator(object):
             "labelIds": tag_ids
         }
         return self._connect.post(self._connect.url.deleteTaskLabel, data)
+
+    def get_list(self, flag=0):
+        """Get the project name based on the flag.
+
+                Args:
+                    flag (int): 0. Query items under this account;
+                                1. Query items under this account and under the master account;
+                                2. Query all items associated with (all items under the same master account)
+
+        """
+        data = {
+            'flag': flag,
+        }
+        return self._connect.post(self._connect.url.list, data)

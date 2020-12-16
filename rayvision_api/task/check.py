@@ -117,7 +117,7 @@ class RayvisionCheck(object):
             task_info["task_info"]["user_id"] = str(self.api.get_user_id())
         if not bool(project_id):
             if task_info["task_info"].get("project_name"):
-                project_id = self.api.check_and_add_project_name(task_info["task_info"]["project_name"])
+                project_id = str(self.api.check_and_add_project_name(task_info["task_info"]["project_name"]))
             else:
                 project_id = "0"
             task_info["task_info"]["project_id"] = project_id
