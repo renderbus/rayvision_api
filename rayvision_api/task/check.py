@@ -256,40 +256,7 @@ class RayvisionCheck(object):
     def _write_to_json_file(self):
         """Update json file.
 
-        Update the processed asset information to the corresponding json file.
-
-        Args:
-            upload_info (dict): Scene path information and texture information
-                used in the scene.
-
         """
-        # # Write upload.json.
-        # if self.upload_info is not None and os.path.isfile(self.upload_json):
-        #     with codecs.open(self.upload_json,
-        #                      'w', 'utf-8') as f_upload_json:
-        #         json.dump(self.upload_info, f_upload_json, indent=4,
-        #                   ensure_ascii=False)
-        #
-        # # Write task.json.
-        # and os.path.isfile(self.upload_json)
-        # with codecs.open(self.task_json,
-        #                  'w', 'utf-8') as f_task_json:
-        #     json.dump(self.task_info, f_task_json, indent=4,
-        #               ensure_ascii=False)
-        #
-        # # Write tips.json.
-        # if self.tips_info is not None and not isinstance(self.tips_info, dict):
-        #     with codecs.open(self.tips_json,
-        #                      'w', 'utf-8') as f_tips_json:
-        #         json.dump(self.tips_info, f_tips_json,
-        #                   indent=4, ensure_ascii=False)
-        #
-        # # Write asset.json.
-        # if self.asset_info is not None and not isinstance(self.asset_info, dict):
-        #     with codecs.open(self.asset_json,
-        #                      'w', 'utf-8') as f_asset_json:
-        #         json.dump(self.asset_info, f_asset_json,
-        #                   indent=4, ensure_ascii=False)
         self._write_json(self.task_info, self.task_json)
         self._write_json(self.upload_info, self.upload_json)
         self._write_json(self.asset_info, self.asset_json)
