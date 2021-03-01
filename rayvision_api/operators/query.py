@@ -534,3 +534,71 @@ class QueryOperator(object):
         ids = [per["id"] for index, per in all_frames.items() if str(index) in restartframes]
         restart_frame = self.restart_frame(ids_list=ids, select_all=0, task_id=task_id)
         return restart_frame
+
+    def get_small_task_id(self, task_id):
+        """Get all child accounts under the main account,
+           if no child accounts, put back to the current account.
+        Args:
+            task_id (int or string): main account
+
+        Returns:
+
+        """
+        items = self.task_info(task_ids_list=[int(task_id)]).get("items")
+        if items:
+            task_lists = items[0].get("respRenderingTaskList", [])
+            ids = [task['id'] for task in task_lists]
+        else:
+            ids = [int(task_id)]
+        return ids
+
+    def stop_frame(self, task_id, select_all=1, ids_list=None, status=None):
+        """Stop task frame.
+
+        Args:
+            task_id (int): Task ID number.
+            ids_list (list, optional): Frame ID list, valid when select_all is
+                0.
+            select_all (int, optional): Whether to re-request all,
+                1 represents the user select all operation,
+                0 represents the user is not all selected,
+                taskId is required when filling in 1, or ids is required when filling in 0 or not.
+            status (list for int, optional): Specifies the state of the stop frame.
+        """
+        if select_all == 1:
+            if task_id:
+                data = {
+                    'taskId': task_id,
+                    'selectAll': select_all
+                }
+            else:
+                raise AttributeError("task_id is required when select_all is 1")
+        else:
+            if ids_list:
+                data = {
+                    'taskId': task_id,
+                    'ids': ids_list,
+                    'selectAll': select_all
+                }
+            else:
+                raise AttributeError("ids is required when select_all is 0")
+
+        if status:
+            data['status'] = status
+
+        return self._connect.post(self._connect.url.stopTaskFrames, data)
+
+    def frame_number_to_stop(self, task_id, stop_frame):
+        """Stop the specified frame according to the frame number.
+
+                Args:
+                    task_id (int) : small task id
+                    stop_frame (list[string]) : The frame number needs to be stop.
+                        Examples:
+                             ["2-4[1]", "10"]
+
+                """
+        all_frames = self.get_all_frames(task_id)
+        ids = [per["id"] for index, per in all_frames.items() if str(index) in stop_frame]
+        stop = self.stop_frame(ids_list=ids, select_all=0, task_id=task_id)
+        return stop

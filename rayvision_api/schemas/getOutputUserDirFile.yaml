@@ -1,0 +1,5 @@
+taskId:
+  type: integer
+treePath:
+  type: string
+  required: True

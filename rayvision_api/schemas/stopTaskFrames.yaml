@@ -1,0 +1,10 @@
+Ids:
+  type: list
+  required: False
+selectAll:
+  type: integer
+taskId:
+  type: integer
+status:
+  type: list
+  required: False

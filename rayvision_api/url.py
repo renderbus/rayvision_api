@@ -47,3 +47,5 @@ class ApiUrl(str, Enum):
     addTaskLabel = '/api/render/handle/addTaskLabel'
     deleteTaskLabel = '/api/render/handle/deleteTaskLabel'
     list = '/api/render/project/list'
+    getOutputUserDirFile = '/api/render/file/operate/getOutputUserDirFile'
+    stopTaskFrames = '/api/render/handle/stopTaskFrames'
