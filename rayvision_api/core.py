@@ -32,7 +32,11 @@ class RayvisionAPI(object):
                  domain='task.renderbus.com',
                  platform='4',
                  protocol='https',
-                 logger=None):
+                 logger=None,
+                 log_folder=None,
+                 log_name=None,
+                 log_level="DEBUG",
+                 ):
         """Please note that this is API parameter initialization.
 
         Args:
@@ -42,12 +46,15 @@ class RayvisionAPI(object):
             platform (str, optional): The platform of renderFarm.
             protocol (str, optional): The requests protocol.
             logger (logging.Logger, optional): The logging logger instance.
-
+            log_folder (str, optional): Custom log save location.
+            log_name (str): Custom log file name.
+            log_level (str, optional): Custom log level, default "DEBUG".
         """
         self.logger = logger
         if not self.logger:
-            init_logger(PACKAGE_NAME)
+            init_logger(PACKAGE_NAME, log_folder, log_name)
             self.logger = logging.getLogger(__name__)
+            self.logger.setLevel(level=log_level.upper())
 
         access_id = access_id or os.getenv("RAYVISION_API_ACCESS_ID")
         if not access_id:
@@ -66,7 +73,8 @@ class RayvisionAPI(object):
                                 access_key,
                                 protocol,
                                 domain,
-                                platform)
+                                platform,
+                                logger=self.logger)
 
         # Initial all api instance.
         self.user = UserOperator(self._connect)

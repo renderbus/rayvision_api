@@ -1,7 +1,6 @@
 """Request, request header and request result processing."""
 
 import copy
-import functools
 import json
 import logging
 from pprint import pformat
@@ -23,7 +22,7 @@ class Connect(object):
     """Connect operation with the server, request."""
 
     def __init__(self, access_id, access_key, protocol, domain, platform,
-                 headers=None, session=None):
+                 headers=None, session=None, logger=None):
         """Connect parameter initialization.
 
         Args:
@@ -34,14 +33,13 @@ class Connect(object):
             protocol (str, optional): The requests protocol.
             session (requests.Session, optional): The session of the requests
                 instance.
-
+            logger (logging.Logger, optional): The logging logger instance.
         """
-        self.logger = logging.getLogger(__name__)
+        self.logger = logger if logger else logging.getLogger(__name__)
         self.url = ApiUrl
         self.domain = domain
         self.platform = platform
         self._access_key = access_key
-        # Example: https://task.renderbus.com
         self._protocol = protocol
         self._protocol_domain = '{0}://{1}'.format(protocol, self.domain)
         if headers:
