@@ -10,14 +10,14 @@ import logging
 import os
 import sys
 import time
+import re
 
 from past.builtins import long
 
 from rayvision_api.constants import MODIFIABLE_PARAM
-from rayvision_api.exception import RayvisionError
+from rayvision_api.exception import RayvisionError, HardwareConfigIdError, NotSupportPluginError, NotSupportCGSoftwareError
 # Import local modules
-from rayvision_api.utils import exists_or_create
-from rayvision_api.utils import json_load
+from rayvision_api.utils import json_load, exists_or_create, update_task_info
 
 
 # pylint: disable=useless-object-inheritance
@@ -129,7 +129,7 @@ class RayvisionCheck(object):
         elif os.path.isfile(data):
             return json_load(data)
 
-    def execute(self, task_json, upload_json="", asset_json="", is_cover=True, only_id=True):
+    def execute(self, hardware_config, task_json, upload_json="", asset_json="", is_cover=True, only_id=True):
         """Check asset configuration information.
 
         Check the scene for problems and filter unwanted configuration
@@ -143,6 +143,8 @@ class RayvisionCheck(object):
             tmp_dir_name = self.check_analyze(analyze=self.analyze,
                                               workspace=os.path.dirname(task_json),
                                               is_cover=is_cover)
+        self.set_custom_hardware(hardware_config, self.get_json_info(task_json), task_json)
+
         task_info = self.get_json_info(task_json)
         upload_info = self.get_json_info(upload_json)
         asset_info = self.get_json_info(asset_json)
@@ -261,3 +263,46 @@ class RayvisionCheck(object):
         self._write_json(self.upload_info, self.upload_json)
         self._write_json(self.asset_info, self.asset_json)
         self._write_json(self.tips_info, self.tips_json)
+
+    def set_custom_hardware(self, custom_hardware, task_info, task_path):
+        """Check whether the hardware configuration information exists and whether it meets the requirements."""
+        hardware_config_list = self.api.user.get_hardware_config()
+        platform = task_info['task_info']['platform']
+        cg_id = task_info['task_info']['cg_id']
+        plugins = task_info['software_config']['plugins']
+        check_keys = ['model', 'ram', 'gpuNum']
+        gpu_num = custom_hardware.get('gpuNum')
+        hardware_id = ''
+        for one_hardware_config in hardware_config_list:
+            if not one_hardware_config['status']:
+                continue
+            not_support_cgid = one_hardware_config['notSupportCgId']
+            if not_support_cgid and cg_id in not_support_cgid:
+                if all(map(lambda key: custom_hardware[key] == one_hardware_config[key], check_keys)):
+                    raise NotSupportCGSoftwareError
+            if one_hardware_config['platform'] != int(platform):
+                continue
+            if not all(map(lambda key: custom_hardware[key] == one_hardware_config[key], check_keys)):
+                continue
+            not_support_plugin_list = one_hardware_config['notSupportPluginList']
+            if not_support_plugin_list:
+                for plugin_str in not_support_plugin_list:
+                    new_plugin_str = plugin_str.replace("(", "").replace(")", "")
+                    for plugin_name, plugin_ver in plugins.items():
+                        plugin_data = "%s %s" % (plugin_name, plugin_ver)
+                        re_result = re.findall(new_plugin_str, plugin_data, re.I)
+                        if re_result and re_result[0]:
+                            raise NotSupportPluginError
+
+            hardware_id = str(one_hardware_config.get('id', ""))
+
+        if not hardware_id:
+            raise HardwareConfigIdError
+
+        update_hardware_config = {
+            "hardwareConfigId": hardware_id,
+            "ram": custom_hardware["ram"].replace("GB", ""),
+            "graphics_cards_num": gpu_num[0] if gpu_num else "2"
+        }
+        update_task_info(update_hardware_config, task_path)
+
