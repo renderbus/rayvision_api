@@ -170,3 +170,15 @@ class DecompressionFailedError(Exception):
 
 class UploadFileNotSupportError(Exception):
     """Upload_file_name_only support does_not_support error."""
+
+
+class HardwareConfigIdError(Exception):
+    """Hardware configuration id are invalid."""
+
+
+class NotSupportPluginError(Exception):
+    """The plugin is not supported."""
+
+
+class NotSupportCGSoftwareError(Exception):
+    """The CG software is not supported."""
