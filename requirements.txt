@@ -2,5 +2,5 @@ attrs==19.3.0
 cattrs==1.0.0
 tenacity==6.0.0
 future==0.18.2
-requests==2.23.0
+requests==2.31.0
 rayvision_log>=0.3.3
