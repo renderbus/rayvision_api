@@ -15,7 +15,7 @@ class ApiUrl(str, Enum):
     createTask = '/api/render/submit/createTask'
     task = '/api/render/submit/task'
     queryAnalyseErrorDetail = '/api/render/submit/queryAnalyseErrorDetail'
-    getTaskList = '/api/render/handle/getTaskList'
+    getTaskList = '/api/render/handle/getTaskList/v2'
     stopTask = '/api/rendering/task/renderingTask/stopTask'
     startTask = '/api/rendering/task/renderingTask/startTask'
     abandonTask = '/api/render/handle/abandonTask'
@@ -24,7 +24,7 @@ class ApiUrl(str, Enum):
     queryAllFrameStats = '/api/render/handle/queryAllFrameStats'
     recommitTasks = '/api/render/handle/recommitTasks'
     recommitTaskFrames = '/api/render/handle/recommitTaskFrames'
-    queryTaskInfo = '/api/render/handle/queryTaskInfo'
+    queryTaskInfo = '/api/render/handle/queryTaskInfo/v2'
     add = '/api/render/project/add'
     delete = '/api/render/project/delete'
     getList = '/api/render/project/getList'
@@ -49,3 +49,8 @@ class ApiUrl(str, Enum):
     list = '/api/render/project/list'
     getOutputUserDirFile = '/api/render/file/operate/getOutputUserDirFile'
     stopTaskFrames = '/api/render/handle/stopTaskFrames'
+    hardwareConfig = '/api/render/hardwareConfig/list'
+    showLog = '/api/render/handle/showLog'
+
+    def __format__(self, format_spec):
+        return str.__format__(str(self._value_), format_spec)

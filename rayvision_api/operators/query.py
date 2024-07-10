@@ -85,7 +85,7 @@ class QueryOperator(object):
 
     def get_task_list(self, page_num=1, page_size=100, status_list=None,
                       search_keyword=None,
-                      start_time=None, end_time=None):
+                      start_time=None, end_time=None, recycle_flag=None):
         """Get task list.
 
         An old to the new row, the old one.
@@ -97,6 +97,8 @@ class QueryOperator(object):
             search_keyword (string): Optional, scenario name or job ID.
             start_time (string): Optional, search limit for start time.
             end_time (string): Optional, search limit for end time.
+            recycle_flag (int): 1 or 0, 1,Identifies query deleted tasks. When this flag is turned on,
+             other conditional query flags should be turned off, otherwise the current flag will not take effect.
 
         Returns:
             dict: Task info, please see the documentation for details.
@@ -135,6 +137,8 @@ class QueryOperator(object):
             data['startTime'] = start_time
         if end_time:
             data['endTime'] = end_time
+        if recycle_flag:
+            data["recycleFlag"] = recycle_flag
         return self._connect.post(self._connect.url.getTaskList, data)
 
     def task_frames(self, task_id, page_num=1, page_size=100,
@@ -341,7 +345,7 @@ class QueryOperator(object):
         return self._connect.post(self._connect.url.querySoftwareList,
                                   validator=False)
 
-    def supported_plugin(self, name):
+    def supported_plugin(self, name, os_name="default"):
         """Get supported rendering software plugins.
 
         Args:
@@ -349,6 +353,9 @@ class QueryOperator(object):
                 e.g.:
                     maya,
                     houdini
+            os_name (str): Os name, the default is based on the current system.
+                e.g.:
+                    windows
 
         Returns:
             dict: Plugin info.
@@ -378,9 +385,10 @@ class QueryOperator(object):
                     }
 
         """
-        cg_id = constants.DCC_ID_MAPPINGS[name.strip()]
-        platform = "windows" if sys.platform.startswith("win") else "linux"
-        data = {'cgId': cg_id, 'osName': platform}
+        cg_id = int(constants.DCC_ID_MAPPINGS[name.strip()])
+        if os_name == "default":
+            os_name = "windows" if sys.platform.startswith("win") else "linux"
+        data = {'cgId': cg_id, 'osName': os_name}
         return self._connect.post(self._connect.url.querySoftwareDetail, data)
 
     def get_transfer_server_msg(self):
@@ -602,3 +610,21 @@ class QueryOperator(object):
         ids = [per["id"] for index, per in all_frames.items() if str(index) in stop_frame]
         stop = self.stop_frame(ids_list=ids, select_all=0, task_id=task_id)
         return stop
+    
+    def get_render_log(self, renderingType="render", pageNum=1, pageSize=1, frame_id=None):
+        """Get frame render log
+
+        Args:
+            renderingType: log type
+            pageNum: The starting page of the log you want to view
+            pageSize: The number of log pages you want to view
+            frame_id: frame id
+        Renturns:
+        
+        """
+        data = {
+            "renderingType": renderingType,
+            "pageNum": pageNum,
+            "pageSize": pageSize,
+            "id": frame_id}
+        return self._connect.post(self._connect.url.showLog, data=data, validator=False)

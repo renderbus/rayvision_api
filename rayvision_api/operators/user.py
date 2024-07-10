@@ -170,3 +170,18 @@ class UserOperator(object):
             key_underline = hump2underline(key)
             if key_underline != "platform":
                 self._info[key_underline] = value
+
+
+    def get_hardware_config(self, task_ids=None):
+        """Get platform hardware configuration information.
+
+        Args:
+            task_ids (list[str]): Specify hardware configuration information for a task.
+
+        Returns:
+
+        """
+        data = {"cloneTask": "false"}
+        if task_ids:
+            data.update({"taskIds": task_ids})
+        return self._connect.post(self._connect.url.hardwareConfig, data=data, validator=False)

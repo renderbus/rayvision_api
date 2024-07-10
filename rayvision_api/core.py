@@ -36,6 +36,7 @@ class RayvisionAPI(object):
                  log_folder=None,
                  log_name=None,
                  log_level="DEBUG",
+                 timeout=60
                  ):
         """Please note that this is API parameter initialization.
 
@@ -49,8 +50,11 @@ class RayvisionAPI(object):
             log_folder (str, optional): Custom log save location.
             log_name (str): Custom log file name.
             log_level (str, optional): Custom log level, default "DEBUG".
+            timeout (float or tuple, optional): How long to wait for the server to send
+                data before giving up, as a float, or a :ref:`(connect timeout,read timeout) <timeouts>` tuple.
         """
         self.logger = logger
+        self.platform = platform
         if not self.logger:
             init_logger(PACKAGE_NAME, log_folder, log_name)
             self.logger = logging.getLogger(__name__)
@@ -74,9 +78,10 @@ class RayvisionAPI(object):
                                 protocol,
                                 domain,
                                 platform,
-                                logger=self.logger)
+                                logger=self.logger,
+                                timeout=timeout)
 
-        # Initial all api instance.
+        # Initial all api instance. 
         self.user = UserOperator(self._connect)
         self.task = TaskOperator(self._connect)
         self.query = QueryOperator(self._connect)

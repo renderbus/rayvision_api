@@ -14,10 +14,10 @@ import re
 
 from past.builtins import long
 
-from rayvision_api.constants import MODIFIABLE_PARAM
-from rayvision_api.exception import RayvisionError, HardwareConfigIdError, NotSupportPluginError, NotSupportCGSoftwareError
+from rayvision_api.constants import MODIFIABLE_PARAM, CG_SETTING
+from rayvision_api.exception import RayvisionError, HardwareConfigIdError, NotSupportPluginError, NotSupportCGSoftwareError, NotSupportHardwareCodeError
 # Import local modules
-from rayvision_api.utils import json_load, exists_or_create, update_task_info
+from rayvision_api.utils import json_load, exists_or_create, update_task_info, json_save
 
 
 # pylint: disable=useless-object-inheritance
@@ -139,11 +139,15 @@ class RayvisionCheck(object):
                              by default 'True'.
 
         """
-        if not isinstance(task_json, dict):
-            tmp_dir_name = self.check_analyze(analyze=self.analyze,
-                                              workspace=os.path.dirname(task_json),
-                                              is_cover=is_cover)
-        self.set_custom_hardware(hardware_config, self.get_json_info(task_json), task_json)
+        workspace = self.workspace if isinstance(task_json, dict) else os.path.dirname(task_json)
+        tmp_dir_name = self.check_analyze(analyze=self.analyze,
+                                          workspace=workspace,
+                                          is_cover=is_cover)
+        if isinstance(task_json, dict):
+            json_save(self.task_json, task_json)
+        self.check_plugin(self.get_json_info(task_json))
+
+        self.set_custom_hardware(hardware_config, self.get_json_info(task_json), self.task_json)
 
         task_info = self.get_json_info(task_json)
         upload_info = self.get_json_info(upload_json)
@@ -264,15 +268,40 @@ class RayvisionCheck(object):
         self._write_json(self.asset_info, self.asset_json)
         self._write_json(self.tips_info, self.tips_json)
 
+    def check_plugin(self, task_data):
+        version = task_data["software_config"]["cg_version"]
+        cg_name = task_data["software_config"]["cg_name"]
+        cg_id = task_data["task_info"]["cg_id"]
+        plugin_name_list = self.api.query.supported_plugin(CG_SETTING[str(cg_id)].lower())["cgVersion"]
+        cg_id = None
+        all_version = []
+
+        for pn_info in plugin_name_list:
+            cg_version = pn_info["cgVersion"]
+            all_version.append(cg_version)
+            if cg_version == version:
+                cg_id = pn_info["id"]
+                break
+        if not cg_id:
+            raise RayvisionError(1000000, "%s %s is not support, supported versions:%s" % (
+                cg_name, version, ",".join(sorted(all_version))))
+
     def set_custom_hardware(self, custom_hardware, task_info, task_path):
         """Check whether the hardware configuration information exists and whether it meets the requirements."""
         hardware_config_list = self.api.user.get_hardware_config()
-        platform = task_info['task_info']['platform']
+        platform = task_info['task_info'].get('platform', self.api.platform)
         cg_id = task_info['task_info']['cg_id']
         plugins = task_info['software_config']['plugins']
         check_keys = ['model', 'ram', 'gpuNum']
         gpu_num = custom_hardware.get('gpuNum')
         hardware_id = ''
+        exist_not_support_code = False
+        allow_hardware_config = []
+        if task_info['software_config']['cg_name'] == "CINEMA 4D" and task_info['software_config']['cg_version'] == "2024":
+            if custom_hardware.get('model').lower() in ["1080ti", "default"] and self.api.platform in ["21", "59", "61"]:
+                raise HardwareConfigIdError(1000001, "CINEMA 4D 2024 GPU area hardware configuration model does"
+                                                     " not allow Defalut and 1080Ti")
+
         for one_hardware_config in hardware_config_list:
             if not one_hardware_config['status']:
                 continue
@@ -280,8 +309,16 @@ class RayvisionCheck(object):
             if not_support_cgid and cg_id in not_support_cgid:
                 if all(map(lambda key: custom_hardware[key] == one_hardware_config[key], check_keys)):
                     raise NotSupportCGSoftwareError
+            not_support_code = one_hardware_config['notSupportCode']
+            not_support_code_list = [item for item in self.tips_info.keys() if item in not_support_code]
+            if (len(not_support_code_list) > 0) and (custom_hardware["model"] == one_hardware_config["model"]):
+                exist_not_support_code = True
+                continue
             if one_hardware_config['platform'] != int(platform):
                 continue
+            if len(not_support_code_list) == 0:
+                allow_hardware_config.append(str({'model': one_hardware_config["model"], 'ram': one_hardware_config["ram"],
+                                    'gpuNum': one_hardware_config["gpuNum"]}))
             if not all(map(lambda key: custom_hardware[key] == one_hardware_config[key], check_keys)):
                 continue
             not_support_plugin_list = one_hardware_config['notSupportPluginList']
@@ -292,12 +329,16 @@ class RayvisionCheck(object):
                         plugin_data = "%s %s" % (plugin_name, plugin_ver)
                         re_result = re.findall(new_plugin_str, plugin_data, re.I)
                         if re_result and re_result[0]:
-                            raise NotSupportPluginError
+                            raise NotSupportPluginError(1000000, "%s is not support %s%s" % (custom_hardware, plugin_name, plugin_ver))
 
             hardware_id = str(one_hardware_config.get('id', ""))
 
+        if exist_not_support_code:
+            raise NotSupportHardwareCodeError(1000000, "It was detected that the rendering file does not match the hardware settings, please choose from the following options:%s" % ",".join(
+                allow_hardware_config))
         if not hardware_id:
-            raise HardwareConfigIdError
+            raise HardwareConfigIdError(1000000, "Allowed Hardware Configuration Information:%s" % ",".join(
+                allow_hardware_config))
 
         update_hardware_config = {
             "hardwareConfigId": hardware_id,

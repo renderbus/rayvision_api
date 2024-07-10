@@ -182,3 +182,6 @@ class NotSupportPluginError(Exception):
 
 class NotSupportCGSoftwareError(Exception):
     """The CG software is not supported."""
+
+class NotSupportHardwareCodeError(Exception):
+    """The Hardware is not supported."""
