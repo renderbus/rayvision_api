@@ -85,14 +85,18 @@ class TagOperator(object):
         }
         return self._connect.post(self._connect.url.addTaskLabel, data)
 
-    def delete_task_tag(self, tag_ids):
+    def delete_task_tag(self, taskIds, labelNames, tag_ids=None):
         """del custom task label.
                 Args:
+                    taskIds (list[int], optional): small task ids.
+                    labelNames (list[string], optional): lable to delete.
                     label_ids (list[int], optional): lable id list.
 
         """
         data = {
-            "labelIds": tag_ids
+            "taskIds": taskIds,
+            "labelNames": labelNames,
+            "labelIds": tag_ids if tag_ids else [],
         }
         return self._connect.post(self._connect.url.deleteTaskLabel, data)
 

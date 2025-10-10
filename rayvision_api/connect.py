@@ -91,7 +91,7 @@ class Connect(object):
         request_address = assemble_api_url(self.domain, api_url,
                                            protocol=self._protocol)
         headers = self._handle_headers(api_url, data)
-        headers["languageFlag"] = "1" if "renderbus" in self.domain else "0"
+        headers["languageFlag"] = "0" if "renderbus" in self.domain else "1"
         data = json.dumps(data)
         self.logger.debug('POST: %s', request_address)
         self.logger.debug('HTTP Headers: %s', pformat(headers))

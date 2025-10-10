@@ -12,8 +12,6 @@ import sys
 import time
 import re
 
-from past.builtins import long
-
 from rayvision_api.constants import MODIFIABLE_PARAM, CG_SETTING
 from rayvision_api.exception import RayvisionError, HardwareConfigIdError, NotSupportPluginError, NotSupportCGSoftwareError, NotSupportHardwareCodeError
 # Import local modules
@@ -244,7 +242,7 @@ class RayvisionCheck(object):
         if task_info is not None:
             for key, value in task_info.items():
                 if key in MODIFIABLE_PARAM:
-                    if isinstance(value, (int, long, float)):
+                    if isinstance(value, (int, str, float)):
                         value = str(value)
                     self.task_info['task_info'][key] = value
 
@@ -297,10 +295,10 @@ class RayvisionCheck(object):
         hardware_id = ''
         exist_not_support_code = False
         allow_hardware_config = []
-        if task_info['software_config']['cg_name'] == "CINEMA 4D" and task_info['software_config']['cg_version'] == "2024":
-            if custom_hardware.get('model').lower() in ["1080ti", "default"] and self.api.platform in ["21", "59", "61"]:
-                raise HardwareConfigIdError(1000001, "CINEMA 4D 2024 GPU area hardware configuration model does"
-                                                     " not allow Defalut and 1080Ti")
+        if task_info['software_config']['cg_name'] == "CINEMA 4D" and task_info['software_config']['cg_version'] in ["2024", "2025"]:
+            if custom_hardware.get('model').lower() in ["1080ti"] and custom_hardware.get('gpuNum').lower() in ["2*gpu"] and self.api.platform in ["21", "59", "61"]:
+                raise HardwareConfigIdError(1000001, "CINEMA 4D 2024&2025 GPU area hardware configuration model does"
+                                                     " not allow 1080Ti with 2*GPU")
 
         for one_hardware_config in hardware_config_list:
             if not one_hardware_config['status']:
@@ -324,10 +322,9 @@ class RayvisionCheck(object):
             not_support_plugin_list = one_hardware_config['notSupportPluginList']
             if not_support_plugin_list:
                 for plugin_str in not_support_plugin_list:
-                    new_plugin_str = plugin_str.replace("(", "").replace(")", "")
                     for plugin_name, plugin_ver in plugins.items():
                         plugin_data = "%s %s" % (plugin_name, plugin_ver)
-                        re_result = re.findall(new_plugin_str, plugin_data, re.I)
+                        re_result = re.findall(plugin_str, plugin_data, re.I)
                         if re_result and re_result[0]:
                             raise NotSupportPluginError(1000000, "%s is not support %s%s" % (custom_hardware, plugin_name, plugin_ver))
 

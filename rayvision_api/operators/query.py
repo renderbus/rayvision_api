@@ -628,3 +628,9 @@ class QueryOperator(object):
             "pageSize": pageSize,
             "id": frame_id}
         return self._connect.post(self._connect.url.showLog, data=data, validator=False)
+    
+    def get_pack_node_info(self):
+        """Get user pack node.
+        """
+        return self._connect.post(self._connect.url.getPackNode, validator=False)
+        

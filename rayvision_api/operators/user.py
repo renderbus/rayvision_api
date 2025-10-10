@@ -185,3 +185,42 @@ class UserOperator(object):
         if task_ids:
             data.update({"taskIds": task_ids})
         return self._connect.post(self._connect.url.hardwareConfig, data=data, validator=False)
+    
+    def task_record(self, pageNum=1, pageSize=10, startDate="", endDate=""):
+        """Get task related operation records
+        Args:
+            pageNum (int): page number
+            pageSize (int): page size
+            startDate (str): start date
+            endDate (str): end date
+        Returns:
+        """
+        
+        data = {
+            'platform': int(self._info["platform"]),
+            'pageNum': pageNum,
+            'pageSize': pageSize,
+            'startDate': startDate,
+            'endDate': endDate,
+        }
+
+        return self._connect.post(self._connect.url.taskRecord, data=data, validator=False)
+    
+
+    def login_record(self, pageNum=1, pageSize=10, startDate="", endDate=""):
+        """Get login record
+        Args:
+            pageNum (int): page number
+            pageSize (int): page size
+            startDate (str): start date
+            endDate (str): end date
+        """
+        
+        data = {
+            'pageNum': pageNum,
+            'pageSize': pageSize,
+            'startDate': startDate,
+            'endDate': endDate,
+        }
+
+        return self._connect.post(self._connect.url.loginRecord, data=data, validator=False)

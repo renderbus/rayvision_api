@@ -1,0 +1,15 @@
+taskIds:
+  type: list
+  required: True
+hardwareConfigId:
+  type: integer
+  required: True
+model:
+  type: string
+  required: True
+ram:
+  type: string
+  required: True
+gpuNum:
+  type: string
+  required: True

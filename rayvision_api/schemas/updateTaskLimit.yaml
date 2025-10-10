@@ -1,0 +1,4 @@
+taskId:
+  type: integer
+taskLimit:
+  type: integer

@@ -207,3 +207,47 @@ class TaskOperator(object):
             'taskIds': task_id_list,
         }
         return self._connect.post(self._connect.url.fullSpeedRendering, data)
+
+    def update_task_limit(self, taskId, taskLimit):
+        """Full to render.
+
+        Args:
+            task_id_list (list of int): Task list.
+            Example:
+                {
+                    "taskIds":[485],
+                }
+        """
+        data = {
+            'taskId': taskId,
+            'taskLimit': taskLimit,
+            
+        }
+        return self._connect.post(self._connect.url.updateTaskLimit, data)
+    
+    def edit_task_hardware_config(self, taskIds, hardwareConfigId, model, gpuNum, ram):
+        """edit task hardware config.
+
+        Args:
+            taskIds (list of int): Task list.
+            hardwareConfigId (int): hardware config id.
+            model (str): model.
+            gpuNum (str): Number of GPU card.
+            ram(str): Memory size.
+            Example:
+                {
+                    "taskIds":[485],
+                    "hardwareConfigId": 223,
+                    "model": "1080Ti",
+                    "ram": "64GB",
+                    "gpuNum": "2*GPU"
+                }
+        """
+        data = {
+            'taskIds': taskIds,
+            'hardwareConfigId': hardwareConfigId,
+            'model': model,
+            'gpuNum': gpuNum,
+            'ram': ram
+        }
+        return self._connect.post(self._connect.url.editTaskHardwareConfig, data)

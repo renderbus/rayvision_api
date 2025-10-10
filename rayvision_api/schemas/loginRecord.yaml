@@ -1,0 +1,12 @@
+pageNum:
+  required: True
+  type: integer
+pageSize:
+  required: True
+  type: integer
+startDate:
+  required: False
+  type: string
+endDate:
+  required: False
+  type: string

@@ -21,6 +21,7 @@ DCC_ID_MAPPINGS = {
     "keyshot": "2012",
     "clarisse": "2013",
     "octane_render": "2014",
+    "nuke": "2015",
     "katana": "2016",
 }
 
@@ -53,6 +54,7 @@ CG_SETTING = {
     "keyshot": "2012",
     "clarisse": "2013",
     "octane_render": "2014",
+    "nuke": "2015",
     "katana": "2016",
     "2000": "maya",
     "2001": "3ds Max",
@@ -69,6 +71,7 @@ CG_SETTING = {
     "2012": "keyshot",
     "2013": "clarisse",
     "2014": "octane_render",
+    "2015": "nuke",
     "2016": "katana",
 
 }
